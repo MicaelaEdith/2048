@@ -6,10 +6,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Main {
+public class RepositoyTest {
 
     public static void main(String[] args) {
-        Main main = new Main();
+        RepositoyTest main = new RepositoyTest();
         List<User> users = main.getAllUsers();
 
         users.forEach(user -> System.out.println(user.toString()));

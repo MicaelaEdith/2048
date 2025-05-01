@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+</head>
+<body>
+    <h1>API Test</h1>
+    <button onclick="fetchMessage()">mensaje del backend</button>
+    <div id="response-container"></div>
+
+    <script>
+        function fetchMessage() {
+            fetch("/api/hello")
+                .then(response => response.json())
+                .then(data => {
+
+                    document.getElementById("response-container").innerHTML = `<p>${data.message}</p>`;
+                })
+                .catch(error => {
+                    document.getElementById("response-container").innerHTML = `<p>Error: ${error}</p>`;
+                });
+        }
+    </script>
+</body>
+</html>
