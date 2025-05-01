@@ -6,4 +6,17 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>app-services</artifactId>
+
+	<dependencies>
+			    <dependency>
+	            <groupId>ar.com.game</groupId>
+	            <artifactId>app-repository</artifactId>
+	            <version>0.0.1-SNAPSHOT</version>
+	        </dependency>
+	        	    <dependency>
+	            <groupId>ar.com.game</groupId>
+	            <artifactId>app-domain</artifactId>
+	            <version>0.0.1-SNAPSHOT</version>
+	        </dependency>	  
+	</dependencies>
 </project>
