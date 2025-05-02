@@ -1,13 +1,16 @@
 package ar.com.game.web.controller;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.servlet.annotation.*;
+
 
 import java.io.IOException;
 
 @WebServlet("/api/hello")
 public class Test extends HttpServlet {
+
+	private static final long serialVersionUID = -7399854612292801537L;
 
 	@Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
