@@ -6,22 +6,10 @@
     <title>Test</title>
 </head>
 <body>
+	<script src="script.js"></script>
     <h1>API Test</h1>
     <button onclick="fetchMessage()">mensaje del backend</button>
     <div id="response-container"></div>
 
-    <script>
-        function fetchMessage() {
-            fetch("/api/hello")
-                .then(response => response.json())
-                .then(data => {
-
-                    document.getElementById("response-container").innerHTML = `<p>${data.message}</p>`;
-                })
-                .catch(error => {
-                    document.getElementById("response-container").innerHTML = `<p>Error: ${error}</p>`;
-                });
-        }
-    </script>
 </body>
 </html>
