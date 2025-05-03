@@ -1,2 +1,2 @@
-ar/com/game/web/controller/Test.class
 org/app/web/App.class
+ar/com/game/web/GameServlet.class

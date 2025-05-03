@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap');
+
+:root {
+    --background-color: #fcf6df;
+    --grid-background: #ffc289;
+    --text-color: #62a3ac;
+}
+
+body {
+    font-family: "Lato", sans-serif;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--background-color);
+    min-height: 100vh;
+    margin: 0;
+}
+
+main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+.title {
+    margin-top: 0;
+    margin-bottom: 3vh;
+}
+
+#grid {
+    display: grid;
+    grid-template-columns: repeat(4, 80px);
+    grid-template-rows: repeat(4, 80px);
+    gap: 5px;
+    color: black;
+}
+
+#profile {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.cell {
+    background: var(--grid-background);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: 700;
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Colores para los valores */
+.value-2    { background-color: #eee4da; color: #776e65; }
+.value-4    { background-color: #ede0c8; color: #776e65; }
+.value-8    { background-color: #f2b179; color: #f9f6f2; }
+.value-16   { background-color: #f59563; color: #f9f6f2; }
+.value-32   { background-color: #f67c5f; color: #f9f6f2; }
+.value-64   { background-color: #f65e3b; color: #f9f6f2; }
+.value-128  { background-color: #edcf72; color: #f9f6f2; }
+.value-256  { background-color: #edcc61; color: #f9f6f2; }
+.value-512  { background-color: #edc850; color: #f9f6f2; }
+.value-1024 { background-color: #edc53f; color: #f9f6f2; }
+.value-2048 { background-color: #edc22e; color: #f9f6f2; }
