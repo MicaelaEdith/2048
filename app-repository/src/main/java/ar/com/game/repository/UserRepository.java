@@ -115,9 +115,61 @@ public class UserRepository {
             }
 
         } catch (SQLException e) {
-            System.err.println("Error finding user: " + e.getMessage());
+            System.err.println("Error finding user by email: " + e.getMessage());
         }
         return null;
+    }
+
+    public User findById(Long id) {
+        String query = "SELECT * FROM users WHERE id = ?";
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setLong(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return extractUserFromResultSet(rs);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error finding user by id: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public boolean deleteUserById(Long id) {
+        String query = "DELETE FROM users WHERE id = ?";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setLong(1, id);
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error deleting user: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public List<User> getAllUsers() {
+        List<User> users = new ArrayList<>();
+        String query = "SELECT * FROM users ORDER BY id";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                users.add(extractUserFromResultSet(rs));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error retrieving all users: " + e.getMessage());
+        }
+
+        return users;
     }
 
     private User extractUserFromResultSet(ResultSet rs) throws SQLException {

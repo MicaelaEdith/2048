@@ -145,4 +145,12 @@ public class Game2048 {
         System.out.println("Score: " + score);
         System.out.println("Game Over: " + isGameOver());
     }
+    
+    public void restart() {
+        board = new int[SIZE][SIZE];
+        score = 0;
+        spawnNewTile();
+        spawnNewTile();
+    }
+
 }

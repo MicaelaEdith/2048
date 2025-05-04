@@ -4,6 +4,7 @@
     --background-color: #fcf6df;
     --grid-background: #ffc289;
     --text-color: #62a3ac;
+    --game-over:rgb(245, 65, 65);
 }
 
 body {
@@ -28,8 +29,9 @@ main {
 }
 
 .title {
-    margin-top: 0;
+    margin-top: 4vh;
     margin-bottom: 3vh;
+    font-weight: 800;
 }
 
 #grid {
@@ -44,6 +46,29 @@ main {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    background-color: #fdf4c3;
+    border-radius: 5px;
+    padding: 25px;
+    padding-top: 10px;
+
+}
+
+#game-over{
+    color:var(--game-over);
+    display:none;
+}
+
+.form-login{
+    display: flex;
+    flex-direction: column;
+    margin-top: 1vh;
+}
+
+input{
+    border: solid 5px var(--grid-background);
+    border-radius: 5px;
+    margin-top: 6px;
+    padding: 4px;
 }
 
 .cell {
@@ -60,7 +85,22 @@ main {
     font-weight: bold;
 }
 
-/* Colores para los valores */
+.btn{
+	background-color: var(--background-color);
+	border: dashed 5px var(--grid-background);
+    border-radius: 5px;
+	color: var(--text-color);
+	font-size: large;
+	font-weight: 700;
+	padding: 15px;
+	margin-top: 1vh;
+}
+
+.btn:hover{
+    background-color: var(--text-color);
+    color: var(--grid-background);
+}
+
 .value-2    { background-color: #eee4da; color: #776e65; }
 .value-4    { background-color: #ede0c8; color: #776e65; }
 .value-8    { background-color: #f2b179; color: #f9f6f2; }

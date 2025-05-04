@@ -10,16 +10,18 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-@WebServlet(urlPatterns = {"/api/move", "/api/state"})
+@WebServlet(urlPatterns = {"/api/move", "/api/state", "/api/restart"})
 public class GameServlet extends HttpServlet {
 
     private static final long serialVersionUID = 5317537938199851509L;
-    private final Game2048 game = new Game2048();
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
+        HttpSession session = req.getSession();
+        Game2048 game = getOrCreateGame(session);
 
         if (req.getRequestURI().endsWith("/state")) {
             Map<String, Object> response = new HashMap<>();
@@ -38,7 +40,12 @@ public class GameServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        if (req.getRequestURI().endsWith("/move")) {
+        String path = req.getRequestURI();
+        HttpSession session = req.getSession();
+
+        if (path.endsWith("/move")) {
+            Game2048 game = getOrCreateGame(session);
+
             Map<String, String> data = mapper.readValue(req.getInputStream(), Map.class);
             String direction = data.get("direction");
 
@@ -51,8 +58,30 @@ public class GameServlet extends HttpServlet {
 
             resp.setContentType("application/json");
             mapper.writeValue(resp.getOutputStream(), response);
+
+        } else if (path.endsWith("/restart")) {
+            Game2048 newGame = new Game2048();
+            session.setAttribute("game", newGame);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("board", newGame.getBoard());
+            response.put("score", newGame.getScore());
+            response.put("gameOver", newGame.isGameOver());
+
+            resp.setContentType("application/json");
+            mapper.writeValue(resp.getOutputStream(), response);
+
         } else {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
+    }
+
+    private Game2048 getOrCreateGame(HttpSession session) {
+        Game2048 game = (Game2048) session.getAttribute("game");
+        if (game == null) {
+            game = new Game2048();
+            session.setAttribute("game", game);
+        }
+        return game;
     }
 }

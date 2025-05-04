@@ -9,9 +9,14 @@ public class GameTest {
 
         Scanner scanner = new Scanner(System.in);
         while (!game.isGameOver()) {
-            System.out.print("Move (up/down/left/right): ");
+            System.out.print("Move (up/down/left/right/restart): ");
             String move = scanner.nextLine();
+            if (move.equals("restart"))
+                game.restart();
+            else 
             game.move(move);
+            
+            
             game.printBoard();
         }
         System.out.println("Game Over!");

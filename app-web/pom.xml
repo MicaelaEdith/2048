@@ -36,6 +36,12 @@
     	<artifactId>app-services</artifactId>
     	<version>0.0.1-SNAPSHOT</version>
 	</dependency>
+
+	<dependency>
+    	<groupId>ar.com.game</groupId>
+    	<artifactId>app-domain</artifactId>
+    	<version>0.0.1-SNAPSHOT</version>
+	</dependency>
 	
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 	<dependency>
@@ -57,6 +63,11 @@
       <scope>test</scope>
     </dependency>
     -->
+    <dependency>
+    	<groupId>ar.com.game</groupId>
+    	<artifactId>app-domain</artifactId>
+    	<version>0.0.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>

@@ -1,4 +1,3 @@
-ar/com/game/services/UserServiceTest.class
 ar/com/game/services/UserService.class
-ar/com/game/services/Game2048.class
 ar/com/game/services/GameTest.class
+ar/com/game/services/Game2048.class

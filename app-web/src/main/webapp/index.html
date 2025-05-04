@@ -4,21 +4,39 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>2048 Competitive</title>
+    <title>2048 Cloud</title>
+    <link rel="icon" href="assets/logo.png" type="image/png" />
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-<h1 class="Title">2048 Cloud</h1>
+<h1 class="title">2048 Cloud</h1>
     <main>
-        <div id="grid"></div>
+        <section>
+            <div id="grid"></div>
+            <button  id="restart-btn" class="btn">RESTART</button>
+        </section>
+        
+        <div id="form-login">
+            <button id="login-btn" class="btn">Log in</button>
+            <button id="signup-btn" class="btn">Sign up</button>
+            <button id="cancel-btn" class="btn">Cancel</button>
+
+            <div class="form-login">
+				<label id="label-name"for="input-name">Name</label><input type="text" name="" id="input-name">
+                <label for="input-mail">Email</label><input type="mail" name="" id="input-mail">
+                <label for="input-password1">Password</label><input type="password" id="input-password1">
+                <label  id="label-pass2" for="input-password2">Password</label><input type="password" id="input-password2">
+                <button id="submit-btn" class="btn" type="submit">Submit</button>
+            </div>
+        </div>
 
         <div id="profile">
-
-            <h3>User Name</h3>
-            <label for="points">Points: </label>
-
-
+            <h3 id="user-name">User Name</h3>
+            <label for="points">Points: <span id="score">0</span></label>
+			<p id="game-over">¡Game Over!</p>
+			
+			<button id="logout-btn" class="btn">Log out</button>
         </div>
 
     </main>
