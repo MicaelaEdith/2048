@@ -3,7 +3,6 @@ package ar.com.game.web;
 import ar.com.game.services.UserService;
 import ar.com.game.services.ServiceResponse;
 import ar.com.game.domain.User;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.servlet.ServletException;
@@ -65,11 +64,9 @@ public class UserServlet extends HttpServlet {
                 ServiceResponse result = userService.registerUser(name, email, password);
                 boolean ok = result.isSuccess();
 
-                // Set response status based on result
                 if (ok) {
                     resp.setStatus(HttpServletResponse.SC_OK);
                 } else {
-                    // If internal server error (message contains 'Error al registrar el usuario:')
                     if (result.getMessage().contains("Error al registrar el usuario:")) {
                         resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                     } else if (result.getMessage().contains("ya existe")) {
@@ -114,15 +111,7 @@ public class UserServlet extends HttpServlet {
                     ));
                 }
 
-            } else if (path.endsWith("/logout")) {
-                session.invalidate();
-                resp.setStatus(HttpServletResponse.SC_OK);
-                writeJson(resp, Map.of(
-                    "success", true,
-                    "message", "Logout exitoso."
-                ));
-
-            } else {
+            }  else {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
 
@@ -141,33 +130,53 @@ public class UserServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String path = req.getRequestURI();
+        HttpSession session = req.getSession(false); // false para no crear sesión nueva si no hay
+
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
 
-        if (path.endsWith("/me")) {
-            HttpSession session = req.getSession(false);
-            if (session != null && session.getAttribute("user") != null) {
-                User user = (User) session.getAttribute("user");
+        try {
+            if (path.endsWith("/me")) {
+                if (session != null && session.getAttribute("user") != null) {
+                    User user = (User) session.getAttribute("user");
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    writeJson(resp, Map.of(
+                        "success", true,
+                        "id", user.getId(),
+                        "name", user.getName(),
+                        "email", user.getEmail()
+                    ));
+                } else {
+                    resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    writeJson(resp, Map.of(
+                        "success", false,
+                        "message", "No hay sesión activa."
+                    ));
+                }
+            } else if (path.endsWith("/logout")) {
+                if (session != null) {
+                    session.invalidate();
+                }
                 resp.setStatus(HttpServletResponse.SC_OK);
                 writeJson(resp, Map.of(
                     "success", true,
-                    "id", user.getId(),
-                    "name", user.getName(),
-                    "email", user.getEmail()
+                    "message", "Logout exitoso."
                 ));
             } else {
-                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                writeJson(resp, Map.of(
-                    "success", false,
-                    "message", "No hay sesión activa."
-                ));
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
-        } else {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            writeJson(resp, Map.of(
+                "success", false,
+                "message", "Error en el servidor: " + e.getMessage()
+            ));
         }
     }
 
     private void writeJson(HttpServletResponse resp, Object data) throws IOException {
         mapper.writeValue(resp.getWriter(), data);
     }
+
 }

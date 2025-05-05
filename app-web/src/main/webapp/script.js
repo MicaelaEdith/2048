@@ -129,11 +129,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const password1 = pass1Input.value;
     const password2 = pass2Input.value;
 
-    console.log("Name ingresado: " + name);
-    console.log("Email ingresado: " + email);
-    console.log("Password ingresada: " + password1);
-    console.log("Password confirmada: " + password2);
-
     const isSignup = pass2Input.style.display !== "none" && pass2Input.value !== "";
 
     if (isSignup) {
@@ -149,7 +144,6 @@ document.addEventListener("DOMContentLoaded", () => {
       })
         .then(resp => resp.json())
         .then(data => {
-		  console.log("Respuesta del servidor:", data);
           if (data.success) {
             showProfile(data.name || email);
           } else {
@@ -238,7 +232,27 @@ document.addEventListener("DOMContentLoaded", () => {
   loginBtn.addEventListener("click", showLoginForm);
   signupBtn.addEventListener("click", showSignupForm);
   cancelBtn.addEventListener("click", hideForm);
-  document.getElementById("logout-btn").addEventListener("click", hideProfile);
+
+  document.getElementById("logout-btn").addEventListener("click", () => {
+    fetch("/app-web/api/user/logout", {
+      method: "GET"
+    })
+      .then(resp => resp.json())
+      .then(data => {
+        if (data.success) {
+          hideProfile();
+          hideForm();
+          alert("redireccionando.");
+          location.reload();
+        } else {
+          alert("Logout failed.");
+        }
+      })
+      .catch(err => {
+        console.error("Logout error:", err);
+        alert("Error during logout.");
+      });
+  });
 
   hideForm();
   hideProfile();
