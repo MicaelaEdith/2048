@@ -1,64 +1,78 @@
-const grid = document.getElementById("grid");
-const scoreDisplay = document.getElementById("score");
-const gameOverDisplay = document.getElementById("game-over");
-const userNameDisplay = document.getElementById("user-name");
-const formLogin = document.getElementById("form-login");
-const profile = document.getElementById("profile");
-
-let matrix = [];
-let startCell = null;
-let startX = 0;
-let startY = 0;
-
-function renderGrid() {
-  grid.innerHTML = "";
-  matrix.forEach((row, rowIndex) => {
-    row.forEach((cell, colIndex) => {
-      const div = document.createElement("div");
-      div.className = "cell";
-      if (cell > 0) {
-        div.classList.add(`value-${cell}`);
-        div.textContent = cell;
-      } else {
-        div.textContent = "";
-      }
-
-      div.dataset.row = rowIndex;
-      div.dataset.col = colIndex;
-
-      div.addEventListener("mousedown", (e) => {
-        startCell = { row: rowIndex, col: colIndex };
-        startX = e.clientX;
-        startY = e.clientY;
-      });
-
-      grid.appendChild(div);
-    });
-  });
-}
-
-function updateUI(data) {
-  matrix = data.board;
-  scoreDisplay.textContent = data.score;
-  gameOverDisplay.style.display = data.gameOver ? "block" : "none";
-  renderGrid();
-}
-
-function sendMove(direction) {
-  fetch("/app-web/api/move", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ direction })
-  })
-    .then(resp => {
-      if (!resp.ok) throw new Error("Error making move");
-      return resp.json();
-    })
-    .then(updateUI)
-    .catch(err => console.error("Error sending move:", err));
-}
-
 document.addEventListener("DOMContentLoaded", () => {
+  const grid = document.getElementById("grid");
+  const scoreDisplay = document.getElementById("score");
+  const gameOverDisplay = document.getElementById("game-over");
+  const userNameDisplay = document.getElementById("user-name");
+  const formLogin = document.getElementById("form-login");
+  const profile = document.getElementById("profile");
+
+  const loginBtn = document.getElementById("login-btn");
+  const signupBtn = document.getElementById("signup-btn");
+  const cancelBtn = document.getElementById("cancel-btn");
+  const submitBtn = document.getElementById("submit-btn");
+
+  const nameInput = document.getElementById("input-name");
+  const nameLabel = document.getElementById("label-name");
+  const emailInput = document.getElementById("input-mail");
+  const pass1Input = document.getElementById("input-password1");
+  const pass2Input = document.getElementById("input-password2");
+  const labelPass2 = document.getElementById("label-pass2");
+
+  const loginForm = document.querySelector(".form-login");
+
+  let matrix = [];
+  let startCell = null;
+  let startX = 0;
+  let startY = 0;
+
+  function renderGrid() {
+    grid.innerHTML = "";
+    matrix.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        const div = document.createElement("div");
+        div.className = "cell";
+        if (cell > 0) {
+          div.classList.add(`value-${cell}`);
+          div.textContent = cell;
+        } else {
+          div.textContent = "";
+        }
+
+        div.dataset.row = rowIndex;
+        div.dataset.col = colIndex;
+
+        div.addEventListener("mousedown", (e) => {
+          startCell = { row: rowIndex, col: colIndex };
+          startX = e.clientX;
+          startY = e.clientY;
+        });
+
+        grid.appendChild(div);
+      });
+    });
+  }
+
+  function updateUI(data) {
+    matrix = data.board;
+    scoreDisplay.textContent = data.score;
+    gameOverDisplay.style.display = data.gameOver ? "block" : "none";
+    renderGrid();
+  }
+
+  function sendMove(direction) {
+    fetch("/app-web/api/move", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ direction })
+    })
+      .then(resp => {
+        if (!resp.ok) throw new Error("Error making move");
+        return resp.json();
+      })
+      .then(updateUI)
+      .catch(err => console.error("Error sending move:", err));
+  }
+
   fetch("/app-web/api/state")
     .then(resp => {
       if (!resp.ok) throw new Error("Error fetching state");
@@ -109,16 +123,21 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(err => console.error("Error restarting game:", err));
   });
 
-  document.getElementById("submit-btn").addEventListener("click", () => {
-    const name = document.getElementById("input-name").value;
-    const email = document.getElementById("input-mail").value;
-    const password1 = document.getElementById("input-password1").value;
-    const password2 = document.getElementById("input-password2").value;
+  submitBtn.addEventListener("click", () => {
+    const name = nameInput.value;
+    const email = emailInput.value;
+    const password1 = pass1Input.value;
+    const password2 = pass2Input.value;
 
-    const isSignup = password2 && password2.style.display !== "none" && password2.value !== "";
+    console.log("Name ingresado: " + name);
+    console.log("Email ingresado: " + email);
+    console.log("Password ingresada: " + password1);
+    console.log("Password confirmada: " + password2);
+
+    const isSignup = pass2Input.style.display !== "none" && pass2Input.value !== "";
 
     if (isSignup) {
-      if (password1 !== password2.value) {
+      if (password1 !== password2) {
         alert("Passwords do not match.");
         return;
       }
@@ -130,6 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })
         .then(resp => resp.json())
         .then(data => {
+		  console.log("Respuesta del servidor:", data);
           if (data.success) {
             showProfile(data.name || email);
           } else {
@@ -164,22 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
           alert("Error during login.");
         });
     }
-});
-
-
-  const loginBtn = document.getElementById("login-btn");
-  const signupBtn = document.getElementById("signup-btn");
-  const cancelBtn = document.getElementById("cancel-btn");
-  const submitBtn = document.getElementById("submit-btn");
-
-  const nameInput = document.getElementById("input-name");
-  const namelabel = document.getElementById("label-name");
-  const emailInput = document.getElementById("input-mail");
-  const pass1Input = document.getElementById("input-password1");
-  const pass2Input = document.getElementById("input-password2");
-  const labelPass2 = document.getElementById("label-pass2");
-
-  const loginForm = document.querySelector(".form-login");
+  });
 
   function showLoginForm() {
     loginForm.style.display = "flex";
