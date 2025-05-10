@@ -57,6 +57,19 @@ document.addEventListener("DOMContentLoaded", () => {
     scoreDisplay.textContent = data.score;
     gameOverDisplay.style.display = data.gameOver ? "block" : "none";
     renderGrid();
+    
+     if (data.gameOver) {
+        alert("Game Over");
+    }
+
+    matrix.forEach(row => {
+        row.forEach(cell => {
+            if (cell === 2048) {
+                alert("¡Felicidades! Has alcanzado 2048.");
+            }
+        });
+    });
+    
   }
 
   function sendMove(direction) {
@@ -179,6 +192,40 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
   });
+
+
+fetch('/app-web/api/ranking')
+  .then(res => res.json())
+  .then(data => {
+    if (!data.success || !data.ranking) return;
+
+    const rankingList = document.querySelector('.ranking');
+    rankingList.innerHTML = '';
+    
+    console.log(data)
+
+    data.ranking.forEach(player => {
+      const tag = document.createElement('div');
+      tag.className = 'ranking-tag';
+
+      const username = document.createElement('h4');
+      username.className = 'username-rank';
+      username.textContent = player.username;
+
+      const points = document.createElement('span');
+      points.className = 'points';
+      points.textContent = player.score;
+
+      tag.appendChild(username);
+      tag.appendChild(points);
+      rankingList.appendChild(tag);
+    });
+  })
+  .catch(err => {
+    console.error('Error cargando ranking:', err);
+  });
+
+
 
   function showLoginForm() {
     loginForm.style.display = "flex";

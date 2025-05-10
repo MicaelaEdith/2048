@@ -96,6 +96,33 @@ input{
 	margin-top: 1vh;
 }
 
+.ranking{
+    display : flex;
+    flex-direction: row;
+}
+
+.ranking .username-rank{
+    font-size: large;
+    text-align: center;
+}
+
+.points{
+    font-size: medium;
+    font-weight: 600;
+    text-align: center;
+}
+
+.ranking-tag{
+    margin: 1vw;
+    background-color: var(--grid-background);
+    border-radius: 5px;
+    padding: 7px;
+    padding-top: 2px;
+    display: flex;
+    flex-direction: column;
+
+}
+
 .btn:hover{
     background-color: var(--text-color);
     color: var(--grid-background);

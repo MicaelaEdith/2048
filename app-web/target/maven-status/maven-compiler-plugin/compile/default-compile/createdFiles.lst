@@ -1,3 +1,4 @@
 org/app/web/App.class
+ar/com/game/web/RankingServlet.class
 ar/com/game/web/UserServlet.class
 ar/com/game/web/GameServlet.class

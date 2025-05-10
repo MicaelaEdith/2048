@@ -2,6 +2,7 @@ package ar.com.game.services;
 
 import ar.com.game.domain.User;
 import ar.com.game.repository.UserRepository;
+import ar.com.game.repository.UserRankingDTO;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.SQLException;
@@ -105,4 +106,9 @@ public class UserService {
     public List<User> getAllUsers() throws SQLException {
         return repository.getAllUsers();
     }
+    
+    public List<UserRankingDTO> getTop10Players() throws SQLException {
+        return repository.getTop10Players();
+    }
+
 }

@@ -1,2 +1,3 @@
 /home/micaelaedith/Documentos/2048/app-repository/src/main/java/ar/com/game/repository/DatabaseConnector.java
 /home/micaelaedith/Documentos/2048/app-repository/src/main/java/ar/com/game/repository/UserRepository.java
+/home/micaelaedith/Documentos/2048/app-repository/src/main/java/ar/com/game/repository/UserRankingDTO.java

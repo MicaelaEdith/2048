@@ -1,2 +1,3 @@
+ar/com/game/repository/UserRankingDTO.class
 ar/com/game/repository/UserRepository.class
 ar/com/game/repository/DatabaseConnector.class

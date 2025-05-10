@@ -155,4 +155,24 @@ public class UserRepository {
         user.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         return user;
     }
+    
+    public List<UserRankingDTO> getTop10Players() throws SQLException {
+        List<UserRankingDTO> ranking = new ArrayList<>();
+        String sql = "SELECT name, total_points FROM users ORDER BY total_points DESC LIMIT 10;";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String username = rs.getString("name");
+                int score = rs.getInt("total_points");
+                ranking.add(new UserRankingDTO(username, score));
+            }
+        }
+
+        return ranking;
+    }
+
+
 }
