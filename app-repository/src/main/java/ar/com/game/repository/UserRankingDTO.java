@@ -1,7 +1,5 @@
 package ar.com.game.repository;
 
-
-
 public class UserRankingDTO {
 	    private String username;
 	    private int score;

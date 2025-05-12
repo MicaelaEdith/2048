@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserRepository {
-
     /**
      * Crea un nuevo usuario en la BD.
      * @throws SQLException si ocurre un error de BD, con el mensaje original.
@@ -173,6 +172,42 @@ public class UserRepository {
 
         return ranking;
     }
+    
+    
+    public String getContactsByUserId(int userId) throws SQLException {
+        String query = "SELECT contacts FROM users WHERE id = ?";
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("contacts");
+                }
+            }
+        }
+        return null;
+    }
+
+    
+    public boolean addContactToUser(int userId, String newContact) throws SQLException {
+        String currentContacts = getContactsByUserId(userId);
+
+        if (currentContacts != null && !currentContacts.isEmpty()) {
+            String[] existing = currentContacts.split(",");
+            for (String contact : existing) {
+                if (contact.trim().equalsIgnoreCase(newContact.trim())) {
+                    return false;
+                }
+            }
+            currentContacts += "," + newContact;
+        } else {
+            currentContacts = newContact;
+        }
+
+        return updateContacts(userId, currentContacts);
+    }
+
 
 
 }
