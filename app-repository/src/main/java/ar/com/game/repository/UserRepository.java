@@ -114,7 +114,7 @@ public class UserRepository {
     }
 
     public boolean deleteUserById(Long id) throws SQLException {
-        String query = "DELETE FROM users WHERE id = ?";
+    	String query = "UPDATE users SET activo = 0 WHERE id = ?";
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 

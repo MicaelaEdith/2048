@@ -57,3 +57,9 @@ CREATE TABLE tournament_results (
     FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+
+
+ALTER TABLE users
+ADD activo TINYINT(1) NOT NULL DEFAULT 1;
+
