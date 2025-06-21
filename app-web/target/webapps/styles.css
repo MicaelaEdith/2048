@@ -21,7 +21,7 @@ body {
 
 main {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
     width: 100%;
     max-width: 80vw;
@@ -89,6 +89,11 @@ input{
     font-weight: bold;
 }
 
+#form-login{
+    width: 25%;
+    align-self: start;
+}
+
 #contacts-list {
   position: relative;
   width: 100%;
@@ -102,13 +107,16 @@ input{
 .dropdown-list {
   position: relative;
   display: block;
-  border: 1px solid #ccc;
+  border: solid 5px var(--grid-background);
   background: white;
-  max-height: 200px;
+  height: calc((8px * 2) * 3 + (3 * 16px));
+  max-height: 120px;
+  min-height: 120px;
   overflow-y: auto;
   margin-top: 4px;
   width: 100%;
 }
+
 
 .dropdown-list div {
   padding: 8px;
@@ -135,11 +143,6 @@ input{
 .btns{
 	display: inline-flex;
 	margin-top: 2vh;
-}
-
-#btn-send-duel{
-	margin-left: 1vw;
-	padding: 8px;
 }
 
 #contacts-list {

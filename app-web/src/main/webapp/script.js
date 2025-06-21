@@ -25,13 +25,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const contactsDropdown = document.getElementById("contacts-dropdown");
   const sendDuelBtn = document.getElementById("btn-send-duel");
 
+  const restartBtn = document.getElementById("restart-btn");
+
   let contacts = [];
   let selectedContact = null;
 
-  let matrix = [];
+  let matrix = Array.from({ length: 4 }, () => Array(4).fill(0));
   let startCell = null;
   let startX = 0;
   let startY = 0;
+  let gameStarted = false;
 
   function renderGrid() {
     grid.innerHTML = "";
@@ -83,7 +86,8 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch("/app-web/api/move", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ direction })
+      body: JSON.stringify({ direction }),
+	  credentials: "include"
     })
       .then(resp => {
         if (!resp.ok) throw new Error("Error making move");
@@ -93,16 +97,10 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(err => console.error("Error sending move:", err));
   }
 
-  fetch("/app-web/api/state")
-    .then(resp => {
-      if (!resp.ok) throw new Error("Error fetching state");
-      return resp.json();
-    })
-    .then(updateUI)
-    .catch(err => console.error("Error loading initial state:", err));
+  // No se inicia el juego automáticamente
 
   document.addEventListener("mouseup", (e) => {
-    if (!startCell) return;
+    if (!gameStarted || !startCell) return;
 
     const deltaX = e.clientX - startX;
     const deltaY = e.clientY - startY;
@@ -119,6 +117,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.addEventListener("keydown", (e) => {
+    if (!gameStarted) return;
+
     const keyMap = {
       ArrowUp: "up",
       ArrowDown: "down",
@@ -131,16 +131,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  document.getElementById("restart-btn").addEventListener("click", () => {
-    fetch("/app-web/api/restart", {
-      method: "POST"
-    })
+  restartBtn.addEventListener("click", () => {
+    const url = gameStarted ? "/app-web/api/restart" : "/app-web/api/state";
+    const method = gameStarted ? "POST" : "GET";
+
+    fetch(url, { method, credentials: "include" })
       .then(resp => {
-        if (!resp.ok) throw new Error("Error restarting game");
+        if (!resp.ok) throw new Error("Error reiniciando o cargando juego");
         return resp.json();
       })
-      .then(updateUI)
-      .catch(err => console.error("Error restarting game:", err));
+      .then(data => {
+        updateUI(data);
+        gameStarted = true;
+        restartBtn.textContent = "RESTART";
+      })
+      .catch(err => console.error("Error:", err));
   });
 
   submitBtn.addEventListener("click", () => {
@@ -160,7 +165,8 @@ document.addEventListener("DOMContentLoaded", () => {
       fetch("/app-web/api/user/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password: password1 })
+        body: JSON.stringify({ name, email, password: password1 }),
+		credentials: "include"
       })
         .then(resp => resp.json())
         .then(data => {
@@ -179,7 +185,8 @@ document.addEventListener("DOMContentLoaded", () => {
       fetch("/app-web/api/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password: password1 })
+        body: JSON.stringify({ email, password: password1 }),
+		credentials: "include"
       })
         .then(resp => resp.json())
         .then(data => {
@@ -229,19 +236,23 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error('Error cargando ranking:', err);
     });
 
-  // --- Contactos y Dropdown ---
+	function loadContacts() {
+	  fetch("/app-web/api/user/contacts", {
+	    credentials: "include"
+	  })
+	    .then(resp => {
+	      if (!resp.ok) throw new Error("No autorizado o error en servidor");
+	      return resp.json();
+	    })
+	    .then(data => {
+	      if (data.success && Array.isArray(data.contacts)) {
+	        contacts = data.contacts;
+	        renderDropdown(contacts);
+	      }
+	    })
+	    .catch(err => console.error("Error cargando contactos:", err));
+	}
 
-  function loadContacts() {
-    fetch("/app-web/api/contacts")
-      .then(resp => resp.json())
-      .then(data => {
-        if (data.success && Array.isArray(data.contacts)) {
-          contacts = data.contacts;
-          renderDropdown(contacts); // se renderiza al cargar
-        }
-      })
-      .catch(err => console.error("Error cargando contactos:", err));
-  }
 
   function renderDropdown(list) {
     contactsDropdown.innerHTML = "";
@@ -279,7 +290,8 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch("/app-web/api/send-duel", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ opponentId: selectedContact.id })
+      body: JSON.stringify({ opponentId: selectedContact.id }),
+	  credentials: "include"
     })
       .then(resp => resp.json())
       .then(data => {
@@ -288,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
           contactSearchInput.value = "";
           selectedContact = null;
           sendDuelBtn.disabled = true;
-          renderDropdown(contacts); // volver a mostrar todos
+          renderDropdown(contacts);
         } else {
           alert("Error enviando solicitud: " + (data.message || ""));
         }
@@ -341,7 +353,7 @@ document.addEventListener("DOMContentLoaded", () => {
     signupBtn.style.display = "none";
     editBtn.style.display = "inline-block";
 
-    renderDropdown(contacts); // Mostrar siempre los contactos
+	loadContacts();
   }
 
   function hideProfile() {
@@ -358,7 +370,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("logout-btn").addEventListener("click", () => {
     fetch("/app-web/api/user/logout", {
-      method: "GET"
+      method: "GET",
+	  credentials: "include"
     })
       .then(resp => resp.json())
       .then(data => {
@@ -379,5 +392,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   hideForm();
   hideProfile();
-  loadContacts();
+  renderGrid();
+
 });

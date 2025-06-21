@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -78,11 +79,22 @@ public class UserServlet extends HttpServlet {
                 }
                 User user = (User) session.getAttribute("user");
                 List<User> allUsers = userService.getAllUsers();
-                List<User> contacts = allUsers.stream()
-                                             .filter(u -> !u.getId().equals(user.getId()))
-                                             .collect(Collectors.toList());
+                List<Map<String, Object>> contactsDto = allUsers.stream()
+                	    .filter(u -> !u.getId().equals(user.getId()))
+                	    .map(u -> {
+                	        Map<String, Object> m = new HashMap<>();
+                	        m.put("id", u.getId());
+                	        m.put("name", u.getName());
+                	        m.put("email", u.getEmail());
+                	        return m;
+                	    })
+                	    .collect(Collectors.toList());
+
                 resp.setStatus(HttpServletResponse.SC_OK);
-                writeJson(resp, Map.of("success", true, "contacts", contacts));
+                writeJson(resp, Map.of(
+                    "success", true,
+                    "contacts", contactsDto
+                ));
             } else {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
