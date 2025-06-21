@@ -109,6 +109,8 @@ public class UserService {
         return repository.getAllUsers();
     }
     
+
+    
     public List<UserRankingDTO> getTop10Players() throws SQLException {
         return repository.getTop10Players();
     }
@@ -138,46 +140,84 @@ public class UserService {
     }
     
 
-   public List<String> getAvailableSkins(int userId) {
-       try {
-           User user = repository.findById((long) userId);
-           if (user == null || user.getAvailableSkins() == null || user.getAvailableSkins().trim().isEmpty()) {
-               return List.of();
-           }
-           return Arrays.stream(user.getAvailableSkins().split(","))
-                        .map(String::trim)
-                        .filter(s -> !s.isEmpty())
-                        .collect(Collectors.toList());
+    public List<String> getAvailableSkins(int userId) {
+        try {
+            User user = repository.findById((long) userId);
+            if (user == null || user.getAvailableSkins() == null || user.getAvailableSkins().trim().isEmpty()) {
+                return List.of();
+            }
+            return Arrays.stream(user.getAvailableSkins().split(","))
+                         .map(String::trim)
+                         .filter(s -> !s.isEmpty())
+                         .collect(Collectors.toList());
 
-       } catch (SQLException e) {
-           return List.of();
-       }
-   }
+        } catch (SQLException e) {
+            return List.of();
+        }
+    }
 
-   public ServiceResponse updateCurrentSkin(int userId, String newSkin) {
-       if (newSkin == null || newSkin.trim().isEmpty()) {
-           return new ServiceResponse(false, "Campo vacío.");
-       }
-       try {
-           User user = repository.findById((long) userId);
-           if (user == null) {
-               return new ServiceResponse(false, "Usuario no encontrado.");
-           }
-           List<String> availableSkins = getAvailableSkins(userId);
-           if (!availableSkins.contains(newSkin)) {
-               return new ServiceResponse(false, "Skin no disponible.");
-           }
+    public ServiceResponse updateCurrentSkin(int userId, String newSkin) {
+        if (newSkin == null || newSkin.trim().isEmpty()) {
+            return new ServiceResponse(false, "Campo vacío.");
+        }
+        try {
+            User user = repository.findById((long) userId);
+            if (user == null) {
+                return new ServiceResponse(false, "Usuario no encontrado.");
+            }
+            List<String> availableSkins = getAvailableSkins(userId);
+            if (!availableSkins.contains(newSkin)) {
+                return new ServiceResponse(false, "Skin no disponible.");
+            }
 
-           user.setCurrentSkin(newSkin);
-           boolean updated = repository.updateUser(user);
-           if (updated) {
-               return new ServiceResponse(true, "Skin actualizado correctamente.");
-           } else {
-               return new ServiceResponse(false, "No se pudo actualizar.");
-           }
-       } catch (SQLException e) {
-           return new ServiceResponse(false, "Error al actualizar: " + e.getMessage());
-       }
-   }
+            user.setCurrentSkin(newSkin);
+            boolean updated = repository.updateUser(user);
+            if (updated) {
+                return new ServiceResponse(true, "Skin actualizado correctamente.");
+            } else {
+                return new ServiceResponse(false, "No se pudo actualizar.");
+            }
+        } catch (SQLException e) {
+            return new ServiceResponse(false, "Error al actualizar: " + e.getMessage());
+        }
+    }
 
+    /**
+     * Devuelve una lista simplificada de usuarios para el dropdown de contactos,
+     * excluyendo al usuario cuyo id se pasa por parámetro.
+     */
+    public List<ContactDto> getContactsExcept(int excludeUserId) {
+        try {
+            List<User> allUsers = repository.getAllUsers();
+            return allUsers.stream()
+                    .filter(u -> u.getId() != excludeUserId)
+                    .map(u -> new ContactDto(u.getId(), u.getName()))
+                    .collect(Collectors.toList());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return List.of(); // Devuelve lista vacía en caso de error
+        }
+    }
+
+    /**
+     * DTO simple para enviar al frontend solo id y nombre del usuario.
+     */
+    public static class ContactDto {
+        private int id;
+        private String name;
+
+        public ContactDto(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        // Getters necesarios para serialización JSON
+        public int getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
 }

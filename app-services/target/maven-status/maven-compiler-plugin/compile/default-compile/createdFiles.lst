@@ -2,5 +2,8 @@ ar/com/game/services/DuelServiceTest.class
 ar/com/game/services/UserService.class
 ar/com/game/services/Game2048.class
 ar/com/game/services/ServiceResponse.class
-ar/com/game/services/GameTest.class
 ar/com/game/services/TournamentService.class
+ar/com/game/services/GameTest.class
+ar/com/game/services/DuelService.class
+ar/com/game/services/Main_Tournament_test.class
+ar/com/game/services/UserService$ContactDto.class

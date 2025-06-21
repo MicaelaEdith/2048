@@ -34,10 +34,18 @@
         <div id="profile">
             <h3 id="user-name">User Name</h3>
             <label for="points">Points: <span id="score">0</span></label>
-            <input type="search" name="" id="">
 			<p id="game-over">¡Game Over!</p>
+
+			<div id="contacts-list">
+				<input type="text" id="contact-search" placeholder="Buscar contacto..." autocomplete="off" />
+				<div id="contacts-dropdown" class="dropdown-list"></div>
+				<button id="btn-send-duel" class="btn" disabled>Send</button>
+			</div>
 			
-			<button id="logout-btn" class="btn">Logout</button>
+			<div class="btns">
+				<button id="logout-btn" class="btn">Logout</button>
+				<button id="edit-btn" class="btn">Edit Profile</button>
+			</div>
         </div>
 
     </main>

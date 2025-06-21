@@ -16,6 +16,7 @@ body {
     background: var(--background-color);
     min-height: 100vh;
     margin: 0;
+	padding-top: 1vh;
 }
 
 main {
@@ -23,8 +24,8 @@ main {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    max-width: 1000px;
-    padding: 40px;
+    max-width: 80vw;
+    padding: 30px;
     box-sizing: border-box;
 }
 
@@ -50,6 +51,9 @@ main {
     border-radius: 5px;
     padding: 25px;
     padding-top: 10px;
+	width: 45%;
+	margin-top: 0;
+	align-self: start;
 
 }
 
@@ -85,6 +89,37 @@ input{
     font-weight: bold;
 }
 
+#contacts-list {
+  position: relative;
+  width: 100%;
+}
+
+#contact-search {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dropdown-list {
+  position: relative;
+  display: block;
+  border: 1px solid #ccc;
+  background: white;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 4px;
+  width: 100%;
+}
+
+.dropdown-list div {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.dropdown-list div:hover {
+  background-color: #eee;
+}
+
+
 .btn{
 	background-color: var(--background-color);
 	border: dashed 5px var(--grid-background);
@@ -92,8 +127,24 @@ input{
 	color: var(--text-color);
 	font-size: large;
 	font-weight: 700;
-	padding: 15px;
+	padding: 12px;
 	margin-top: 1vh;
+	margin-right: 1vw;
+}
+
+.btns{
+	display: inline-flex;
+	margin-top: 2vh;
+}
+
+#btn-send-duel{
+	margin-left: 1vw;
+	padding: 8px;
+}
+
+#contacts-list {
+  position: relative;
+  width: 100%;
 }
 
 .ranking{

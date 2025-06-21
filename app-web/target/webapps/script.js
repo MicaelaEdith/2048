@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const scoreDisplay = document.getElementById("score");
   const gameOverDisplay = document.getElementById("game-over");
   const userNameDisplay = document.getElementById("user-name");
+  const editBtn = document.getElementById("edit-btn");
   const formLogin = document.getElementById("form-login");
   const profile = document.getElementById("profile");
 
@@ -19,6 +20,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const labelPass2 = document.getElementById("label-pass2");
 
   const loginForm = document.querySelector(".form-login");
+
+  const contactSearchInput = document.getElementById("contact-search");
+  const contactsDropdown = document.getElementById("contacts-dropdown");
+  const sendDuelBtn = document.getElementById("btn-send-duel");
+
+  let contacts = [];
+  let selectedContact = null;
 
   let matrix = [];
   let startCell = null;
@@ -57,19 +65,18 @@ document.addEventListener("DOMContentLoaded", () => {
     scoreDisplay.textContent = data.score;
     gameOverDisplay.style.display = data.gameOver ? "block" : "none";
     renderGrid();
-    
-     if (data.gameOver) {
-        alert("Game Over");
+
+    if (data.gameOver) {
+      alert("Game Over");
     }
 
     matrix.forEach(row => {
-        row.forEach(cell => {
-            if (cell === 2048) {
-                alert("¡Felicidades! Has alcanzado 2048.");
-            }
-        });
+      row.forEach(cell => {
+        if (cell === 2048) {
+          alert("¡Felicidades! Has alcanzado 2048.");
+        }
+      });
     });
-    
   }
 
   function sendMove(direction) {
@@ -193,39 +200,104 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  fetch('/app-web/api/ranking')
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success || !data.ranking) return;
 
-fetch('/app-web/api/ranking')
-  .then(res => res.json())
-  .then(data => {
-    if (!data.success || !data.ranking) return;
+      const rankingList = document.querySelector('.ranking');
+      rankingList.innerHTML = '';
 
-    const rankingList = document.querySelector('.ranking');
-    rankingList.innerHTML = '';
-    
-    console.log(data)
+      data.ranking.forEach(player => {
+        const tag = document.createElement('div');
+        tag.className = 'ranking-tag';
 
-    data.ranking.forEach(player => {
-      const tag = document.createElement('div');
-      tag.className = 'ranking-tag';
+        const username = document.createElement('h4');
+        username.className = 'username-rank';
+        username.textContent = player.username;
 
-      const username = document.createElement('h4');
-      username.className = 'username-rank';
-      username.textContent = player.username;
+        const points = document.createElement('span');
+        points.className = 'points';
+        points.textContent = player.score;
 
-      const points = document.createElement('span');
-      points.className = 'points';
-      points.textContent = player.score;
-
-      tag.appendChild(username);
-      tag.appendChild(points);
-      rankingList.appendChild(tag);
+        tag.appendChild(username);
+        tag.appendChild(points);
+        rankingList.appendChild(tag);
+      });
+    })
+    .catch(err => {
+      console.error('Error cargando ranking:', err);
     });
-  })
-  .catch(err => {
-    console.error('Error cargando ranking:', err);
+
+  // --- Contactos y Dropdown ---
+
+  function loadContacts() {
+    fetch("/app-web/api/contacts")
+      .then(resp => resp.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.contacts)) {
+          contacts = data.contacts;
+          renderDropdown(contacts); // se renderiza al cargar
+        }
+      })
+      .catch(err => console.error("Error cargando contactos:", err));
+  }
+
+  function renderDropdown(list) {
+    contactsDropdown.innerHTML = "";
+    if (list.length === 0) {
+      contactsDropdown.style.display = "none";
+      return;
+    }
+
+    list.forEach(contact => {
+      const div = document.createElement("div");
+      div.textContent = contact.name;
+      div.dataset.id = contact.id;
+      div.addEventListener("click", () => {
+        selectedContact = contact;
+        contactSearchInput.value = contact.name;
+        sendDuelBtn.disabled = false;
+      });
+      contactsDropdown.appendChild(div);
+    });
+
+    contactsDropdown.style.display = "block";
+  }
+
+  contactSearchInput.addEventListener("input", () => {
+    selectedContact = null;
+    sendDuelBtn.disabled = true;
+    const term = contactSearchInput.value.toLowerCase();
+    const filtered = contacts.filter(c => c.name.toLowerCase().includes(term));
+    renderDropdown(filtered);
   });
 
+  sendDuelBtn.addEventListener("click", () => {
+    if (!selectedContact) return;
 
+    fetch("/app-web/api/send-duel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ opponentId: selectedContact.id })
+    })
+      .then(resp => resp.json())
+      .then(data => {
+        if (data.success) {
+          alert(`Solicitud enviada a ${selectedContact.name}`);
+          contactSearchInput.value = "";
+          selectedContact = null;
+          sendDuelBtn.disabled = true;
+          renderDropdown(contacts); // volver a mostrar todos
+        } else {
+          alert("Error enviando solicitud: " + (data.message || ""));
+        }
+      })
+      .catch(err => {
+        console.error("Error enviando solicitud de duelo:", err);
+        alert("Error enviando solicitud.");
+      });
+  });
 
   function showLoginForm() {
     loginForm.style.display = "flex";
@@ -267,6 +339,9 @@ fetch('/app-web/api/ranking')
     formLogin.style.display = "none";
     loginBtn.style.display = "none";
     signupBtn.style.display = "none";
+    editBtn.style.display = "inline-block";
+
+    renderDropdown(contacts); // Mostrar siempre los contactos
   }
 
   function hideProfile() {
@@ -274,6 +349,7 @@ fetch('/app-web/api/ranking')
     formLogin.style.display = "block";
     loginBtn.style.display = "inline-block";
     signupBtn.style.display = "inline-block";
+    editBtn.style.display = "none";
   }
 
   loginBtn.addEventListener("click", showLoginForm);
@@ -303,4 +379,5 @@ fetch('/app-web/api/ranking')
 
   hideForm();
   hideProfile();
+  loadContacts();
 });
