@@ -4,6 +4,7 @@ import ar.com.game.services.UserService;
 import ar.com.game.services.DuelService;
 import ar.com.game.services.ServiceResponse;
 import ar.com.game.domain.User;
+import ar.com.game.domain.Duel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.servlet.ServletException;
@@ -21,7 +22,10 @@ import java.util.stream.Collectors;
     "/api/user/logout",
     "/api/user/me",
     "/api/user/contacts",
-    "/api/user/send-duel"
+    "/api/user/send-duel",
+    "/api/user/update-points",
+    "/api/user/duel/pending",
+    "/api/user/duel/last"
 })
 public class UserServlet extends HttpServlet {
 
@@ -95,7 +99,90 @@ public class UserServlet extends HttpServlet {
                     "success", true,
                     "contacts", contactsDto
                 ));
+            } else if (path.endsWith("/duel/pending")) {
+                if (session == null || session.getAttribute("user") == null) {
+                    resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    writeJson(resp, Map.of("success", false, "message", "No hay sesión activa."));
+                    return;
+                }
+
+                User user = (User) session.getAttribute("user");
+                Duel duel = duelService.getPendingDuelForUser(user.getId());
+
+                if (duel != null) {
+                    int opponentId = duel.getPlayer1Id() == user.getId() ? duel.getPlayer2Id() : duel.getPlayer1Id();
+                    User opponent = userService.findById((long)opponentId);
+                    String opponentName = opponent != null ? opponent.getName() : "oponente";
+                    Integer opponentScore = null;
+
+                    if (duel.getPlayer1Id() == user.getId()) {
+                        opponentScore = duel.getPlayer2Points();
+                    } else {
+                        opponentScore = duel.getPlayer1Points();
+                    }
+
+                    writeJson(resp, Map.of(
+                        "success", true,
+                        "duelPending", true,
+                        "opponentName", opponentName,
+                        "opponentScore", opponentScore != null ? opponentScore : 0
+                    ));
+
+                } else {
+                    writeJson(resp, Map.of("success", true, "duelPending", false));
+                }
+            } 
+            
+         else if (path.endsWith("/duel/last")) {
+            if (session == null || session.getAttribute("user") == null) {
+                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                writeJson(resp, Map.of("success", false, "message", "No hay sesión activa."));
+                return;
+            }
+
+            User user = (User) session.getAttribute("user");
+            Duel lastDuel = duelService.getLastDuelForUser(user.getId());
+
+            if (lastDuel != null) {
+                Integer p1 = lastDuel.getPlayer1Points();
+                Integer p2 = lastDuel.getPlayer2Points();
+
+                boolean isPlayer1 = lastDuel.getPlayer1Id() == user.getId();
+                Integer ownPoints = isPlayer1 ? p1 : p2;
+                Integer opponentPoints = isPlayer1 ? p2 : p1;
+
+                User opponent = userService.findById((long)(isPlayer1 ? lastDuel.getPlayer2Id() : lastDuel.getPlayer1Id()));
+                String opponentName = opponent != null ? opponent.getName() : "oponente";
+
+                if (ownPoints != null && opponentPoints != null) {
+                    String result = ownPoints > opponentPoints ? "Ganaste" :
+                                    ownPoints < opponentPoints ? "Perdiste" :
+                                    "Empate";
+                    writeJson(resp, Map.of(
+                        "success", true,
+                        "duelFound", true,
+                        "message", String.format("Último duelo contra %s: %s (%d vs %d)",
+                            opponentName, result, ownPoints, opponentPoints)
+                    ));
+                } else {
+                    writeJson(resp, Map.of(
+                        "success", true,
+                        "duelFound", true,
+                        "message", String.format("Último duelo contra %s: el oponente aún no ha jugado su partida.",
+                            opponentName)
+                    ));
+                }
             } else {
+                writeJson(resp, Map.of("success", true, "duelFound", false));
+            }
+        }
+
+            
+            
+            
+            
+            
+            else {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
@@ -238,6 +325,39 @@ public class UserServlet extends HttpServlet {
                 }
             
 
+            } else if (path.endsWith("/update-points")) {
+                if (session == null || session.getAttribute("user") == null) {
+                    resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    writeJson(resp, Map.of("success", false, "message", "No hay sesión activa."));
+                    return;
+                }
+
+                User user = (User) session.getAttribute("user");
+                Object scoreRaw = data.get("score");
+
+                if (scoreRaw == null) {
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    writeJson(resp, Map.of("success", false, "message", "Falta el puntaje."));
+                    return;
+                }
+
+                int score;
+                if (scoreRaw instanceof Integer) {
+                    score = (Integer) scoreRaw;
+                } else {
+                    try {
+                        score = Integer.parseInt(scoreRaw.toString());
+                    } catch (NumberFormatException e) {
+                        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        writeJson(resp, Map.of("success", false, "message", "Formato de puntaje inválido."));
+                        return;
+                    }
+                }
+
+                userService.updateTotalPointsIfHigher(user.getId(), score);
+
+                resp.setStatus(HttpServletResponse.SC_OK);
+                writeJson(resp, Map.of("success", true, "message", "Puntaje verificado y actualizado si era mayor."));
             } else {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             }

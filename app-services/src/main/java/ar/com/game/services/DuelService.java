@@ -39,5 +39,24 @@ public class DuelService {
             return false;
         }
     }
+    
+    public Duel getPendingDuelForUser(int userId) {
+        try {
+            return duelRepository.findPendingDuelForUser(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    
+    public Duel getLastDuelForUser(int userId) {
+        try {
+            return duelRepository.findLastDuelForUser(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 }

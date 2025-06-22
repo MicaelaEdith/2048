@@ -209,5 +209,22 @@ public class UserRepository {
     }
 
 
+    public boolean updateTotalPointsIfHigher(int userId, int newScore) throws SQLException {
+        String sql = """
+            UPDATE users
+            SET total_points = ?
+            WHERE id = ? AND ? > total_points
+        """;
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, newScore);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, newScore);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
 
 }

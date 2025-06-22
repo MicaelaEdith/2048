@@ -220,4 +220,13 @@ public class UserService {
             return name;
         }
     }
+    
+    public void updateTotalPointsIfHigher(int userId, int score) {
+        try {
+            repository.updateTotalPointsIfHigher(userId, score);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -27,6 +27,7 @@ main {
     max-width: 80vw;
     padding: 30px;
     box-sizing: border-box;
+    padding-bottom: 12px;
 }
 
 .title {
@@ -142,6 +143,10 @@ input{
 	margin-right: 1vw;
 }
 
+#submit-btn{
+    width: 115px;
+}
+
 #btn-send-duel{
 	width: 25%;
 	padding: 3px;
@@ -168,6 +173,8 @@ input{
 .ranking .username-rank{
     font-size: large;
     text-align: center;
+    margin-top: 10px;
+    margin-bottom: 6px;
 }
 
 .points{
@@ -176,12 +183,23 @@ input{
     text-align: center;
 }
 
+.ranking-title{
+    font-size: larger;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--background-color);
+    background-color: var(--text-color);
+    border: solid 4px var(--text-color);
+    border-radius: 5px;
+    padding: 3px 6px 3px 6px;
+}
+
 .ranking-tag{
-    margin: 1vw;
+    margin: 6px;
+    margin-top: 0;
     background-color: var(--grid-background);
     border-radius: 5px;
-    padding: 7px;
-    padding-top: 2px;
+    padding: 8px 20px 8px 20px;
     display: flex;
     flex-direction: column;
 
@@ -209,4 +227,50 @@ input{
 .form-login,
 #cancel-btn {
     display: none;
+}
+
+.modal-alert {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: var(--background-color);
+  padding: 35px 60px;
+  border: solid 6px var(--grid-background);
+  border-radius: 8px;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.modal-content p {
+  margin-bottom: 20px;
+}
+
+#alert-ok-btn {
+  padding: 8px 16px;
+  background: var(--background-color);
+  color: var(--text-color);
+  font-weight: 600;
+  border: dashed 3px var(--grid-background);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#alert-ok-btn:hover {
+  color: var(--background-color);
+  background-color: var(--text-color);
+  border: dashed 3px var(--grid-background)
+}
+
+.hidden {
+  display: none;
 }

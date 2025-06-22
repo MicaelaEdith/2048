@@ -1,3 +1,17 @@
+function showCustomAlert(message, callback = null) {
+  const modal = document.getElementById("custom-alert");
+  const messageEl = document.getElementById("alert-message");
+  const okBtn = document.getElementById("alert-ok-btn");
+
+  messageEl.textContent = message;
+  modal.classList.remove("hidden");
+
+  okBtn.onclick = () => {
+    modal.classList.add("hidden");
+    if (callback) callback();
+  };
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const grid = document.getElementById("grid");
   const scoreDisplay = document.getElementById("score");
@@ -35,6 +49,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let startX = 0;
   let startY = 0;
   let gameStarted = false;
+  
+  let duelActive = false;
+  let duelOpponentName = null;
+  let duelOpponentScore = null;
 
   function renderGrid() {
     grid.innerHTML = "";
@@ -65,21 +83,67 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateUI(data) {
     matrix = data.board;
-    scoreDisplay.textContent = data.score;
-    gameOverDisplay.style.display = data.gameOver ? "block" : "none";
     renderGrid();
+    gameOverDisplay.style.display = data.gameOver ? "block" : "none";
 
-    if (data.gameOver) {
-      alert("Game Over");
-    }
-
+    let has2048 = false;
     matrix.forEach(row => {
       row.forEach(cell => {
         if (cell === 2048) {
-          alert("¡Felicidades! Has alcanzado 2048.");
+          has2048 = true;
         }
       });
     });
+
+    const finalScore = has2048 ? data.score + 2048 : data.score;
+    scoreDisplay.textContent = finalScore;
+
+    if (data.gameOver) {
+      showCustomAlert("Game Over");
+
+      fetch("/app-web/api/duel/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ score: finalScore }),
+        credentials: "include"
+      })
+        .then(resp => resp.json())
+        .then(resp => {
+          if (resp.success) {
+            console.log("Puntaje de duelo registrado.");
+          } else {
+            console.error("Error al registrar puntaje de duelo:", resp.message);
+          }
+        })
+        .catch(err => console.error("Error al enviar puntuación del duelo:", err));
+
+      fetch("/app-web/api/user/update-points", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ score: finalScore }),
+        credentials: "include"
+      })
+        .then(resp => resp.json())
+        .then(resp => {
+          if (resp.success) {
+            console.log("Puntaje total actualizado si correspondía.");
+          } else {
+            console.error("Error al actualizar puntaje total:", resp.message);
+          }
+        })
+        .catch(err => console.error("Error al enviar total_points:", err));
+		
+		if (duelActive) {
+		  if (finalScore > duelOpponentScore) {
+		    showCustomAlert(`¡Ganaste el duelo contra ${duelOpponentName} con ${finalScore} puntos!`);
+		  } else if (finalScore < duelOpponentScore) {
+		    showCustomAlert(`Perdiste el duelo contra ${duelOpponentName}. Tu puntaje: ${finalScore}, oponente: ${duelOpponentScore}.`);
+		  } else {
+		    showCustomAlert(`Empate en el duelo con ${duelOpponentName}. Ambos hicieron ${finalScore} puntos.`);
+		  }
+		  duelActive = false;
+		}
+    }
   }
 
   function sendMove(direction) {
@@ -87,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ direction }),
-	  credentials: "include"
+      credentials: "include"
     })
       .then(resp => {
         if (!resp.ok) throw new Error("Error making move");
@@ -96,8 +160,6 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(updateUI)
       .catch(err => console.error("Error sending move:", err));
   }
-
-  // No se inicia el juego automáticamente
 
   document.addEventListener("mouseup", (e) => {
     if (!gameStarted || !startCell) return;
@@ -131,6 +193,37 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  function updateRanking() {
+    fetch('/app-web/api/ranking')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success || !data.ranking) return;
+
+        const rankingList = document.querySelector('.ranking');
+        rankingList.innerHTML = '';
+
+        data.ranking.forEach(player => {
+          const tag = document.createElement('div');
+          tag.className = 'ranking-tag';
+
+          const username = document.createElement('h4');
+          username.className = 'username-rank';
+          username.textContent = player.username;
+
+          const points = document.createElement('span');
+          points.className = 'points';
+          points.textContent = player.score;
+
+          tag.appendChild(username);
+          tag.appendChild(points);
+          rankingList.appendChild(tag);
+        });
+      })
+      .catch(err => {
+        console.error('Error cargando ranking:', err);
+      });
+  }
+
   restartBtn.addEventListener("click", () => {
     const url = gameStarted ? "/app-web/api/restart" : "/app-web/api/state";
     const method = gameStarted ? "POST" : "GET";
@@ -144,6 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateUI(data);
         gameStarted = true;
         restartBtn.textContent = "RESTART";
+        updateRanking();
       })
       .catch(err => console.error("Error:", err));
   });
@@ -158,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (isSignup) {
       if (password1 !== password2) {
-        alert("Passwords do not match.");
+        showCustomAlert("Passwords do not match.");
         return;
       }
 
@@ -166,19 +260,19 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password: password1 }),
-		credentials: "include"
+        credentials: "include"
       })
         .then(resp => resp.json())
         .then(data => {
           if (data.success) {
             showProfile(data.name || email);
           } else {
-            alert("Signup failed: " + (data.message || "Unknown error"));
+            showCustomAlert("Signup failed: " + (data.message || "Unknown error"));
           }
         })
         .catch(err => {
           console.error("Signup error:", err);
-          alert("Error during signup.");
+          showCustomAlert("Error during signup.");
         });
 
     } else {
@@ -186,7 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password: password1 }),
-		credentials: "include"
+        credentials: "include"
       })
         .then(resp => resp.json())
         .then(data => {
@@ -197,62 +291,32 @@ document.addEventListener("DOMContentLoaded", () => {
                 showProfile(userData.name);
               });
           } else {
-            alert("Login failed: " + (data.message || "Unknown error"));
+            showCustomAlert("Login failed: " + (data.message || "Unknown error"));
           }
         })
         .catch(err => {
           console.error("Login error:", err);
-          alert("Error during login.");
+          showCustomAlert("Error during login.");
         });
     }
   });
 
-  fetch('/app-web/api/ranking')
-    .then(res => res.json())
-    .then(data => {
-      if (!data.success || !data.ranking) return;
-
-      const rankingList = document.querySelector('.ranking');
-      rankingList.innerHTML = '';
-
-      data.ranking.forEach(player => {
-        const tag = document.createElement('div');
-        tag.className = 'ranking-tag';
-
-        const username = document.createElement('h4');
-        username.className = 'username-rank';
-        username.textContent = player.username;
-
-        const points = document.createElement('span');
-        points.className = 'points';
-        points.textContent = player.score;
-
-        tag.appendChild(username);
-        tag.appendChild(points);
-        rankingList.appendChild(tag);
-      });
+  function loadContacts() {
+    fetch("/app-web/api/user/contacts", {
+      credentials: "include"
     })
-    .catch(err => {
-      console.error('Error cargando ranking:', err);
-    });
-
-	function loadContacts() {
-	  fetch("/app-web/api/user/contacts", {
-	    credentials: "include"
-	  })
-	    .then(resp => {
-	      if (!resp.ok) throw new Error("No autorizado o error en servidor");
-	      return resp.json();
-	    })
-	    .then(data => {
-	      if (data.success && Array.isArray(data.contacts)) {
-	        contacts = data.contacts;
-	        renderDropdown(contacts);
-	      }
-	    })
-	    .catch(err => console.error("Error cargando contactos:", err));
-	}
-
+      .then(resp => {
+        if (!resp.ok) throw new Error("No autorizado o error en servidor");
+        return resp.json();
+      })
+      .then(data => {
+        if (data.success && Array.isArray(data.contacts)) {
+          contacts = data.contacts;
+          renderDropdown(contacts);
+        }
+      })
+      .catch(err => console.error("Error cargando contactos:", err));
+  }
 
   function renderDropdown(list) {
     contactsDropdown.innerHTML = "";
@@ -291,23 +355,24 @@ document.addEventListener("DOMContentLoaded", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ opponentId: selectedContact.id }),
-	  credentials: "include"
+      credentials: "include"
     })
       .then(resp => resp.json())
       .then(data => {
         if (data.success) {
-          alert(`Solicitud enviada a ${selectedContact.name}`);
+		  showCustomAlert(`Duelo iniciado con ${selectedContact.name}. La próxima partida corresponde a este duelo.`);
           contactSearchInput.value = "";
           selectedContact = null;
           sendDuelBtn.disabled = true;
           renderDropdown(contacts);
+          restartBtn.click();
         } else {
-          alert("Error enviando solicitud: " + (data.message || ""));
+          showCustomAlert("Error enviando solicitud: " + (data.message || ""));
         }
       })
       .catch(err => {
         console.error("Error enviando solicitud de duelo:", err);
-        alert("Error enviando solicitud.");
+        showCustomAlert("Error enviando solicitud.");
       });
   });
 
@@ -353,7 +418,33 @@ document.addEventListener("DOMContentLoaded", () => {
     signupBtn.style.display = "none";
     editBtn.style.display = "inline-block";
 
-	loadContacts();
+    loadContacts();
+
+    fetch("/app-web/api/user/duel/pending", {
+      credentials: "include"
+    })
+      .then(resp => resp.json())
+      .then(data => {
+        if (data.success && data.duelPending && data.opponentName) {
+          showCustomAlert(`Duelo pendiente con ${data.opponentName}. La próxima partida corresponde a ese duelo.`);
+          duelActive = true;
+          duelOpponentName = data.opponentName;
+          duelOpponentScore = data.opponentScore || 0;
+          restartBtn.click();
+        } else {
+          fetch("/app-web/api/user/duel/last", {
+            credentials: "include"
+          })
+            .then(resp => resp.json())
+            .then(data => {
+              if (data.success && data.duelFound) {
+                showCustomAlert(data.message);
+              }
+            })
+            .catch(err => console.error("Error verificando último duelo:", err));
+        }
+      })
+      .catch(err => console.error("Error verificando duelo pendiente:", err));
   }
 
   function hideProfile() {
@@ -371,27 +462,26 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("logout-btn").addEventListener("click", () => {
     fetch("/app-web/api/user/logout", {
       method: "GET",
-	  credentials: "include"
+      credentials: "include"
     })
       .then(resp => resp.json())
       .then(data => {
         if (data.success) {
           hideProfile();
           hideForm();
-          alert("redireccionando.");
-          location.reload();
+          showCustomAlert("redireccionando.", () => location.reload());
         } else {
-          alert("Logout failed.");
+          showCustomAlert("Logout failed.");
         }
       })
       .catch(err => {
         console.error("Logout error:", err);
-        alert("Error during logout.");
+        showCustomAlert("Error during logout.");
       });
   });
 
   hideForm();
   hideProfile();
   renderGrid();
-
+  updateRanking();
 });
