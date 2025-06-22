@@ -195,7 +195,7 @@ public class UserServlet extends HttpServlet {
                     ));
                 }
 
-            } else if (path.endsWith("/send-duel")) {
+            }  else if (path.endsWith("/send-duel")) {
                 if (session == null || session.getAttribute("user") == null) {
                     resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     writeJson(resp, Map.of(
@@ -204,15 +204,23 @@ public class UserServlet extends HttpServlet {
                     ));
                     return;
                 }
+
                 User user = (User) session.getAttribute("user");
 
-                String opponentIdStr = data.get("opponentId");
-                if (opponentIdStr == null) {
+                Object rawOpponentId = data.get("opponentId");
+
+                if (rawOpponentId == null) {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     writeJson(resp, Map.of("success", false, "message", "Falta opponentId."));
                     return;
                 }
-                int opponentId = Integer.parseInt(opponentIdStr);
+
+                int opponentId;
+                if (rawOpponentId instanceof Integer) {
+                    opponentId = (Integer) rawOpponentId;
+                } else {
+                    opponentId = Integer.parseInt(rawOpponentId.toString());
+                }
 
                 if (opponentId == user.getId()) {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -228,6 +236,8 @@ public class UserServlet extends HttpServlet {
                     resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                     writeJson(resp, Map.of("success", false, "message", "Error al crear duelo."));
                 }
+            
+
             } else {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             }

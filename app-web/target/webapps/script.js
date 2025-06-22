@@ -287,7 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
   sendDuelBtn.addEventListener("click", () => {
     if (!selectedContact) return;
 
-    fetch("/app-web/api/send-duel", {
+    fetch("/app-web/api/user/send-duel", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ opponentId: selectedContact.id }),

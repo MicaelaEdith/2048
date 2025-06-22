@@ -100,8 +100,9 @@ input{
 }
 
 #contact-search {
-  width: 100%;
+  width: 70%;
   box-sizing: border-box;
+  margin-right: 3%;
 }
 
 .dropdown-list {
@@ -114,8 +115,8 @@ input{
   max-height: 120px;
   min-height: 120px;
   overflow-y: auto;
-  margin-top: 4px;
-  width: 90%;
+  margin-top: 10px;
+  width: 100%;
 }
 
 
@@ -139,6 +140,14 @@ input{
 	padding: 12px;
 	margin-top: 1vh;
 	margin-right: 1vw;
+}
+
+#btn-send-duel{
+	width: 25%;
+	padding: 3px;
+	padding-left: 8px;
+	padding-right: 8px;
+	margin-right: 0;
 }
 
 .btns{

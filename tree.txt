@@ -1,0 +1,175 @@
+.
+├── app-domain
+│   ├── pom.xml
+│   ├── src
+│   │   └── main
+│   │       └── java
+│   │           └── ar
+│   │               └── com
+│   │                   └── game
+│   │                       └── domain
+│   └── target
+│       ├── app-domain-0.0.1-SNAPSHOT.jar
+│       ├── classes
+│       │   └── ar
+│       │       └── com
+│       │           └── game
+│       │               └── domain
+│       │                   ├── Duel.class
+│       │                   ├── Tournament.class
+│       │                   └── User.class
+│       ├── generated-sources
+│       │   └── annotations
+│       ├── maven-archiver
+│       │   └── pom.properties
+│       └── maven-status
+│           └── maven-compiler-plugin
+│               └── compile
+│                   └── default-compile
+│                       ├── createdFiles.lst
+│                       └── inputFiles.lst
+├── app-repository
+│   ├── pom.xml
+│   ├── src
+│   │   └── main
+│   │       └── java
+│   │           └── ar
+│   │               └── com
+│   │                   └── game
+│   │                       └── repository
+│   └── target
+│       ├── app-repository-0.0.1-SNAPSHOT.jar
+│       ├── classes
+│       │   └── ar
+│       │       └── com
+│       │           └── game
+│       │               └── repository
+│       │                   ├── DatabaseConnector.class
+│       │                   ├── DuelRepository.class
+│       │                   ├── DuelTest.class
+│       │                   ├── TournamentRepository.class
+│       │                   ├── TournamentRepositoryImpl.class
+│       │                   ├── UserRankingDTO.class
+│       │                   ├── UserRepository.class
+│       │                   └── UserTest.class
+│       ├── generated-sources
+│       │   └── annotations
+│       ├── maven-archiver
+│       │   └── pom.properties
+│       └── maven-status
+│           └── maven-compiler-plugin
+│               └── compile
+│                   └── default-compile
+│                       ├── createdFiles.lst
+│                       └── inputFiles.lst
+├── app-services
+│   ├── pom.xml
+│   ├── src
+│   │   └── main
+│   │       └── java
+│   │           └── ar
+│   │               └── com
+│   │                   └── game
+│   │                       └── services
+│   └── target
+│       ├── app-services-0.0.1-SNAPSHOT.jar
+│       ├── classes
+│       │   └── ar
+│       │       └── com
+│       │           └── game
+│       │               └── services
+│       │                   ├── DuelService.class
+│       │                   ├── DuelServiceTest.class
+│       │                   ├── Game2048.class
+│       │                   ├── GameTest.class
+│       │                   ├── Main_Tournament_test.class
+│       │                   ├── ServiceResponse.class
+│       │                   ├── TournamentService.class
+│       │                   ├── UserService$ContactDto.class
+│       │                   └── UserService.class
+│       ├── generated-sources
+│       │   └── annotations
+│       ├── maven-archiver
+│       │   └── pom.properties
+│       └── maven-status
+│           └── maven-compiler-plugin
+│               └── compile
+│                   └── default-compile
+│                       ├── createdFiles.lst
+│                       └── inputFiles.lst
+├── app-web
+│   ├── pom.xml
+│   ├── src
+│   │   └── main
+│   │       ├── java
+│   │       │   ├── ar
+│   │       │   │   └── com
+│   │       │   │       └── game
+│   │       │   │           └── web
+│   │       │   └── org
+│   │       │       └── app
+│   │       │           └── web
+│   │       │               └── App.java
+│   │       └── webapp
+│   │           ├── assets
+│   │           │   └── logo.png
+│   │           ├── index.html
+│   │           ├── script.js
+│   │           ├── styles.css
+│   │           └── WEB-INF
+│   │               └── web.xml
+│   └── target
+│       ├── app-web.war
+│       ├── classes
+│       │   ├── ar
+│       │   │   └── com
+│       │   │       └── game
+│       │   │           └── web
+│       │   │               ├── GameServlet.class
+│       │   │               ├── RankingServlet.class
+│       │   │               └── UserServlet.class
+│       │   └── org
+│       │       └── app
+│       │           └── web
+│       │               └── App.class
+│       ├── generated-sources
+│       │   └── annotations
+│       ├── maven-archiver
+│       │   └── pom.properties
+│       ├── maven-status
+│       │   └── maven-compiler-plugin
+│       │       └── compile
+│       │           └── default-compile
+│       │               ├── createdFiles.lst
+│       │               └── inputFiles.lst
+│       └── webapps
+│           ├── assets
+│           │   └── logo.png
+│           ├── index.html
+│           ├── META-INF
+│           ├── script.js
+│           ├── styles.css
+│           └── WEB-INF
+│               ├── classes
+│               │   ├── ar
+│               │   │   └── com
+│               │   │       └── game
+│               │   └── org
+│               │       └── app
+│               │           └── web
+│               ├── lib
+│               │   ├── app-domain-0.0.1-SNAPSHOT.jar
+│               │   ├── app-repository-0.0.1-SNAPSHOT.jar
+│               │   ├── app-services-0.0.1-SNAPSHOT.jar
+│               │   ├── jackson-annotations-2.19.0.jar
+│               │   ├── jackson-core-2.19.0.jar
+│               │   ├── jackson-databind-2.19.0.jar
+│               │   ├── jbcrypt-0.4.jar
+│               │   ├── mysql-connector-j-8.0.33.jar
+│               │   └── protobuf-java-3.21.9.jar
+│               └── web.xml
+├── pom.xml
+├── sqlscript.sql
+└── tree.txt
+
+106 directories, 67 files
