@@ -63,3 +63,13 @@ CREATE TABLE tournament_results (
 ALTER TABLE users
 ADD activo TINYINT(1) NOT NULL DEFAULT 1;
 
+
+CREATE TABLE tournament_participants (
+    tournament_id INT,
+    user_id INT,
+    points INT DEFAULT 0,
+    finished BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (tournament_id, user_id),
+    FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

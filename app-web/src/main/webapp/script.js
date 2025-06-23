@@ -186,7 +186,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		restartBtn.click();
     }
 	
-	
   }
 
   function sendMove(direction) {
@@ -319,28 +318,32 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
     } else {
-      fetch("/app-web/api/user/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password: password1 }),
-        credentials: "include"
-      })
-        .then(resp => resp.json())
-        .then(data => {
-          if (data.success) {
-            fetch("/app-web/api/user/me")
-              .then(resp => resp.json())
-              .then(userData => {
-                showProfile(userData.name);
-              });
-          } else {
-            showCustomAlert("Login failed: " + (data.message || "Unknown error"));
-          }
-        })
-        .catch(err => {
-          console.error("Login error:", err);
-          showCustomAlert("Error during login.");
-        });
+		fetch("/app-web/api/user/login", {
+		    method: "POST",
+		    headers: { "Content-Type": "application/json" },
+		    body: JSON.stringify({ email, password: password1 }),
+		    credentials: "include"
+		})
+		.then(resp => resp.json())
+		.then(data => {
+		    if (data.success) {
+		        showProfile(data.name);
+
+		        const statsDiv = document.getElementById("user-stats");
+		        statsDiv.innerHTML = `
+		            <span>Jugados: ${data.competitiveMatches}</span>
+		            <span>Ganados: ${data.wins}</span>
+		            <span>Perdidos: ${data.losses}</span>
+		        `;
+		    } else {
+		        showCustomAlert("Login failed: " + (data.message || "Unknown error"));
+		    }
+		})
+		.catch(err => {
+		    console.error("Login error:", err);
+		    showCustomAlert("Error during login.");
+		});
+
     }
   });
 
@@ -452,8 +455,7 @@ document.addEventListener("DOMContentLoaded", () => {
     nameInput.style.display = "none";
     nameLabel.style.display = "none";
   }
-
-  function showProfile(userName) {
+  function showProfile(userName, stats = null) {
     document.querySelector("#profile h3").textContent = userName;
     profile.style.display = "flex";
     formLogin.style.display = "none";
@@ -461,11 +463,22 @@ document.addEventListener("DOMContentLoaded", () => {
     signupBtn.style.display = "none";
     editBtn.style.display = "inline-block";
 
+    const statsDiv = document.getElementById("user-stats");
+    if (stats) {
+      statsDiv.innerHTML = `
+        <span>Jugados: ${stats.competitiveMatches}</span>
+        <span>Ganados: ${stats.wins}</span>
+        <span>Perdidos: ${stats.losses}</span>
+      `;
+      statsDiv.style.display = "flex";
+      statsDiv.style.gap = "10px";
+    } else {
+      statsDiv.style.display = "none";
+    }
+
     loadContacts();
 
-    fetch("/app-web/api/user/duel/pending", {
-      credentials: "include"
-    })
+    fetch("/app-web/api/user/duel/pending", { credentials: "include" })
       .then(resp => resp.json())
       .then(data => {
         if (data.success && data.duelPending && data.opponentName) {
@@ -476,9 +489,7 @@ document.addEventListener("DOMContentLoaded", () => {
           currentDuelId = data.duelId || null;
           restartBtn.click();
         } else {
-          fetch("/app-web/api/user/duel/last", {
-            credentials: "include"
-          })
+          fetch("/app-web/api/user/duel/last", { credentials: "include" })
             .then(resp => resp.json())
             .then(data => {
               if (data.success && data.duelFound) {
@@ -497,8 +508,11 @@ document.addEventListener("DOMContentLoaded", () => {
     loginBtn.style.display = "inline-block";
     signupBtn.style.display = "inline-block";
     editBtn.style.display = "none";
+
+    // Ocultar stats al esconder perfil
+    const statsDiv = document.getElementById("user-stats");
+    statsDiv.style.display = "none";
   }
-  
   function showEditProfile(userName) {
     formEditProfile.style.display = "block";
     profile.style.display = "none";
@@ -563,13 +577,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   });
 
-
-
   loginBtn.addEventListener("click", showLoginForm);
   signupBtn.addEventListener("click", showSignupForm);
   cancelBtn.addEventListener("click", hideForm);
 
-  
   document.getElementById("logout-btn").addEventListener("click", () => {
     fetch("/app-web/api/user/logout", {
       method: "GET",
@@ -621,15 +632,11 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   });
 
-  
-  
   hideForm();
   hideProfile();
   renderGrid();
   updateRanking();
 });
-
-
 const tournamentPanel = document.getElementById("tournament-panel");
 const tournamentsBtn = document.getElementById("tournaments-btn");
 const backToProfileBtn = document.getElementById("back-to-profile-btn");
@@ -640,22 +647,20 @@ const tournamentSearchInput = document.getElementById("tournament-search");
 const tournamentDropdown = document.getElementById("tournament-dropdown");
 
 let tournamentList = [];
+let filteredList = [];
 let selectedTournamentId = null;
 
-// Mostrar el panel de torneos
 tournamentsBtn.addEventListener("click", () => {
   profile.style.display = "none";
   tournamentPanel.style.display = "block";
   loadTournaments();
 });
 
-// Volver al perfil
 backToProfileBtn.addEventListener("click", () => {
   tournamentPanel.style.display = "none";
   profile.style.display = "flex";
 });
 
-// Crear torneo
 createTournamentBtn.addEventListener("click", () => {
   const name = tournamentNameInput.value.trim();
 
@@ -670,7 +675,7 @@ createTournamentBtn.addEventListener("click", () => {
       if (data.success) {
         showCustomAlert(`Torneo creado con ID ${data.id} y nombre "${data.name}"`);
         tournamentNameInput.value = "";
-        loadTournaments(); // actualizar lista
+        loadTournaments();
       } else {
         showCustomAlert("Error al crear torneo: " + (data.message || ""));
       }
@@ -681,14 +686,14 @@ createTournamentBtn.addEventListener("click", () => {
     });
 });
 
-// Cargar torneos disponibles
 function loadTournaments() {
-  fetch("/app-web/api/tournament/all", { credentials: "include" })
+  fetch("/app-web/api/tournament/list", { credentials: "include" })
     .then(resp => resp.json())
     .then(data => {
       if (data.success && Array.isArray(data.tournaments)) {
         tournamentList = data.tournaments;
-        renderTournamentDropdown(tournamentList);
+        filteredList = tournamentList;
+        renderTournamentDropdown(filteredList);
       }
     })
     .catch(err => {
@@ -696,43 +701,48 @@ function loadTournaments() {
     });
 }
 
-// Renderizar lista desplegable
 function renderTournamentDropdown(list) {
   tournamentDropdown.innerHTML = "";
   if (list.length === 0) {
-    tournamentDropdown.style.display = "none";
+    const option = document.createElement("option");
+    option.textContent = "No hay torneos disponibles";
+    option.disabled = true;
+    tournamentDropdown.appendChild(option);
+    tournamentDropdown.disabled = true;
+    joinTournamentBtn.disabled = true;
+    selectedTournamentId = null;
     return;
   }
 
+  const placeholderOption = document.createElement("option");
+  placeholderOption.value = "";
+  placeholderOption.textContent = "Seleccioná un torneo";
+  placeholderOption.selected = true;
+  placeholderOption.disabled = true;
+  tournamentDropdown.appendChild(placeholderOption);
+
   list.forEach(t => {
-    const item = document.createElement("div");
-    item.textContent = t.name;
-    item.dataset.id = t.id;
-    item.classList.add("dropdown-item");
-
-    item.addEventListener("click", () => {
-      tournamentSearchInput.value = t.name;
-      selectedTournamentId = t.id;
-      tournamentDropdown.style.display = "none";
-      joinTournamentBtn.disabled = false;
-    });
-
-    tournamentDropdown.appendChild(item);
+    const option = document.createElement("option");
+    option.value = t.id;
+    option.textContent = t.name;
+    tournamentDropdown.appendChild(option);
   });
-
-  tournamentDropdown.style.display = "block";
+  tournamentDropdown.disabled = false;
+  joinTournamentBtn.disabled = true;
+  selectedTournamentId = null;
 }
 
-// Filtro al escribir
 tournamentSearchInput.addEventListener("input", () => {
   const value = tournamentSearchInput.value.toLowerCase();
-  const filtered = tournamentList.filter(t => t.name.toLowerCase().includes(value));
-  selectedTournamentId = null;
-  joinTournamentBtn.disabled = true;
-  renderTournamentDropdown(filtered);
+  filteredList = tournamentList.filter(t => t.name.toLowerCase().includes(value));
+  renderTournamentDropdown(filteredList);
 });
 
-// Unirse a torneo seleccionado
+tournamentDropdown.addEventListener("change", () => {
+  selectedTournamentId = tournamentDropdown.value ? parseInt(tournamentDropdown.value, 10) : null;
+  joinTournamentBtn.disabled = !selectedTournamentId;
+});
+
 joinTournamentBtn.addEventListener("click", () => {
   if (!selectedTournamentId) {
     showCustomAlert("Seleccioná un torneo.");
@@ -750,7 +760,7 @@ joinTournamentBtn.addEventListener("click", () => {
       if (data.success) {
         showCustomAlert(`Te uniste al torneo correctamente.`);
         tournamentSearchInput.value = "";
-        tournamentDropdown.innerHTML = "";
+        renderTournamentDropdown(tournamentList);
         joinTournamentBtn.disabled = true;
         selectedTournamentId = null;
       } else {
@@ -762,4 +772,3 @@ joinTournamentBtn.addEventListener("click", () => {
       showCustomAlert("Error uniéndose al torneo.");
     });
 });
-

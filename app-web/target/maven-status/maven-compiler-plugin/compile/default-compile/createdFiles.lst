@@ -1,6 +1,8 @@
 org/app/web/App.class
-ar/com/game/web/TournamentServlet.class
 ar/com/game/web/DuelServlet.class
+ar/com/game/web/TournamentServlet.class
 ar/com/game/web/RankingServlet.class
 ar/com/game/web/UserServlet.class
+ar/com/game/web/UserStatsServlet.class
+ar/com/game/web/UserStatsServlet$1.class
 ar/com/game/web/GameServlet.class

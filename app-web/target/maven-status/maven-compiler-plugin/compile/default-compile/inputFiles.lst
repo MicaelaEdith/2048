@@ -3,4 +3,5 @@
 /home/micaelaedith/Documentos/2048/app-web/src/main/java/ar/com/game/web/RankingServlet.java
 /home/micaelaedith/Documentos/2048/app-web/src/main/java/ar/com/game/web/TournamentServlet.java
 /home/micaelaedith/Documentos/2048/app-web/src/main/java/ar/com/game/web/UserServlet.java
+/home/micaelaedith/Documentos/2048/app-web/src/main/java/ar/com/game/web/UserStatsServlet.java
 /home/micaelaedith/Documentos/2048/app-web/src/main/java/org/app/web/App.java

@@ -34,6 +34,8 @@
         <div id="profile">
 			<div style="display: flex; margin-bottom: 10px;">
 			<button id="tournaments-btn" class="btn">Torneos</button>
+			<div id="user-stats" style="font-size: 0.9em; color: #333; display: flex; flex-direction: column;">
+			 </div>
             <h3 id="user-name">User Name</h3>
 			</div>
             <label for="points">Points: <span id="score">0</span></label>
@@ -83,14 +85,15 @@
 		  </div>
 
 		  <div id="tournament-select-panel">
-		    <input type="text" id="tournament-search" placeholder="Buscar torneo...">
+		    <input type="text" id="tournament-search" placeholder="Buscar torneo..." autocomplete="off" />
+		    <select id="tournament-dropdown" class="dropdown-list" size="5" style="width: 100%; margin-top: 5px;">
+		    </select>
 		    <button id="join-tournament-btn" class="btn" disabled>Unirse al torneo</button>
 		  </div>
-		    <div id="tournament-dropdown" class="dropdown-list"></div>
-
 
 		  <div id="tournament-feedback"></div>
 		</div>
+
 
 		
     </main>

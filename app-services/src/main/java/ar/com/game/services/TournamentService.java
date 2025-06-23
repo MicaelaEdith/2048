@@ -1,32 +1,24 @@
 package ar.com.game.services;
 
 import ar.com.game.domain.Tournament;
+import ar.com.game.repository.TournamentParticipantsRepository;
 import ar.com.game.repository.TournamentRepository;
-import ar.com.game.repository.TournamentRepositoryImpl;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TournamentService {
     private final TournamentRepository tournamentRepo;
+    private final TournamentParticipantsRepository participantsRepo;
     private final Map<Integer, Tournament> activeTournaments = new HashMap<>();
+    private final int MAX_PARTICIPANTS = 3;
 
-    // Constructor vacío que crea la conexión y la implementación del repositorio
-    public TournamentService() {
-        try {
-            // Cambia esta URL por la de tu DB, con usuario y contraseña si hace falta
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/tu_basededatos", "usuario", "password");
-            this.tournamentRepo = new TournamentRepositoryImpl(connection);
-        } catch (SQLException e) {
-            throw new RuntimeException("Error al conectar a la base de datos", e);
-        }
-    }
-
-    // Constructor con repo externo (por si inyectás)
-    public TournamentService(TournamentRepository repo) {
-        this.tournamentRepo = repo;
+    public TournamentService(TournamentRepository tournamentRepo, TournamentParticipantsRepository participantsRepo) {
+        this.tournamentRepo = tournamentRepo;
+        this.participantsRepo = participantsRepo;
     }
 
     public Tournament createTournament(String name, int creatorId) {
@@ -41,11 +33,19 @@ public class TournamentService {
         return saved;
     }
 
-    public void joinTournament(int tournamentId, int userId) {
-        Tournament t = activeTournaments.get(tournamentId);
-        if (t != null && !t.isStarted()) {
-            t.getParticipants().add(userId);
+    public boolean isTournamentFull(int tournamentId) throws SQLException {
+        return participantsRepo.countParticipants(tournamentId) >= MAX_PARTICIPANTS;
+    }
+
+    public boolean joinTournament(int tournamentId, int userId) throws SQLException {
+        if (isTournamentFull(tournamentId)) {
+            return false;
         }
+        boolean added = participantsRepo.addParticipant(tournamentId, userId);
+		if (added) {
+		    return true;
+		}
+        return false;
     }
 
     public void startTournament(int tournamentId) {
@@ -64,9 +64,8 @@ public class TournamentService {
         }
     }
 
-    public List<Integer> getParticipants(int tournamentId) {
-        Tournament t = activeTournaments.get(tournamentId);
-        return t != null ? t.getParticipants() : Collections.emptyList();
+    public List<Integer> getParticipants(int tournamentId) throws SQLException {
+        return participantsRepo.findParticipantsByTournamentId(tournamentId);
     }
 
     public boolean isCreator(int tournamentId, int userId) {
@@ -74,7 +73,6 @@ public class TournamentService {
         return t != null && t.getCreatorId() == userId;
     }
 
-    // Método para obtener todos los torneos de la BD
     public List<Tournament> getAllTournaments() {
         return tournamentRepo.findAll();
     }

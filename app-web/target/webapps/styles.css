@@ -130,6 +130,10 @@ input{
   background-color: #eee;
 }
 
+.dropdown-list option{
+	color: gray;
+	font-size: medium;
+}
 
 .btn{
 	background-color: var(--background-color);

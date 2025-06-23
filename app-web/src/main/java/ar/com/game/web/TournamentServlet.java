@@ -3,6 +3,8 @@ package ar.com.game.web;
 import ar.com.game.domain.Tournament;
 import ar.com.game.domain.User;
 import ar.com.game.repository.DatabaseConnector;
+import ar.com.game.repository.TournamentParticipantsRepository;
+import ar.com.game.repository.TournamentParticipantsRepositoryImpl;
 import ar.com.game.repository.TournamentRepository;
 import ar.com.game.repository.TournamentRepositoryImpl;
 import ar.com.game.services.TournamentService;
@@ -13,7 +15,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,9 +33,10 @@ public class TournamentServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         try {
-        	Connection connection = DatabaseConnector.getConnection();
-            TournamentRepository repo = new TournamentRepositoryImpl(connection);
-            this.tournamentService = new TournamentService(repo);
+            Connection connection = DatabaseConnector.getConnection();
+            TournamentRepository tournamentRepo = new TournamentRepositoryImpl(connection);
+            TournamentParticipantsRepository participantsRepo = new TournamentParticipantsRepositoryImpl(connection);
+            this.tournamentService = new TournamentService(tournamentRepo, participantsRepo);
         } catch (Exception e) {
             throw new ServletException("Error inicializando TournamentService", e);
         }
@@ -92,7 +94,7 @@ public class TournamentServlet extends HttpServlet {
             return;
         }
 
-        Map<String, String> data;
+        Map<String, Object> data;
         try {
             data = mapper.readValue(req.getInputStream(), Map.class);
         } catch (Exception e) {
@@ -108,7 +110,7 @@ public class TournamentServlet extends HttpServlet {
 
         try {
             if (path.endsWith("/create")) {
-                String name = data.get("name");
+                String name = (String) data.get("name");
                 Tournament created = tournamentService.createTournament(name, user.getId());
 
                 resp.setStatus(HttpServletResponse.SC_OK);
@@ -118,9 +120,36 @@ public class TournamentServlet extends HttpServlet {
                     "name", created.getName()
                 ));
             } else if (path.endsWith("/join")) {
-                String rawId = data.get("tournamentId");
-                int id = Integer.parseInt(rawId);
-                tournamentService.joinTournament(id, user.getId());
+                Object rawId = data.get("tournamentId");
+                int id;
+
+                // Puede venir como Integer o String, manejar ambos casos
+                if (rawId instanceof Integer) {
+                    id = (Integer) rawId;
+                } else if (rawId instanceof String) {
+                    id = Integer.parseInt((String) rawId);
+                } else {
+                    throw new IllegalArgumentException("ID de torneo inválido");
+                }
+
+                if (tournamentService.isTournamentFull(id)) {
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    mapper.writeValue(resp.getWriter(), Map.of(
+                        "success", false,
+                        "message", "El torneo está lleno."
+                    ));
+                    return;
+                }
+
+                boolean joined = tournamentService.joinTournament(id, user.getId());
+                if (!joined) {
+                    resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    mapper.writeValue(resp.getWriter(), Map.of(
+                        "success", false,
+                        "message", "No se pudo unir al torneo."
+                    ));
+                    return;
+                }
 
                 resp.setStatus(HttpServletResponse.SC_OK);
                 mapper.writeValue(resp.getWriter(), Map.of(

@@ -1,7 +1,10 @@
+/home/micaelaedith/Documentos/2048/app-repository/src/main/java/ar/com/game/repository/TournamentParticipantsRepository.java
 /home/micaelaedith/Documentos/2048/app-repository/src/main/java/ar/com/game/repository/DatabaseConnector.java
+/home/micaelaedith/Documentos/2048/app-repository/src/main/java/ar/com/game/repository/TournamentParticipantsRepositoryImpl.java
 /home/micaelaedith/Documentos/2048/app-repository/src/main/java/ar/com/game/repository/TournamentRepositoryImpl.java
 /home/micaelaedith/Documentos/2048/app-repository/src/main/java/ar/com/game/repository/UserRepository.java
 /home/micaelaedith/Documentos/2048/app-repository/src/main/java/ar/com/game/repository/DuelTest.java
+/home/micaelaedith/Documentos/2048/app-repository/src/main/java/ar/com/game/repository/UserStatsRepository.java
 /home/micaelaedith/Documentos/2048/app-repository/src/main/java/ar/com/game/repository/DuelRepository.java
 /home/micaelaedith/Documentos/2048/app-repository/src/main/java/ar/com/game/repository/TournamentRepository.java
 /home/micaelaedith/Documentos/2048/app-repository/src/main/java/ar/com/game/repository/UserRankingDTO.java

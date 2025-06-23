@@ -30,6 +30,12 @@ public class DuelService {
 
             if (updated && duelRepository.isDuelFinished(duel.getId())) {
                 duelRepository.resolveWinner(duel.getId());
+
+                UserService userService = new UserService();
+                ServiceResponse resp = userService.updateStatsForBothPlayersFromDuel(duel.getId());
+                if (!resp.isSuccess()) {
+                    System.err.println("Error actualizando estadísticas de usuarios: " + resp.getMessage());
+                }
             }
 
             return updated;
@@ -38,6 +44,8 @@ public class DuelService {
             return false;
         }
     }
+
+
 
     public Duel getPendingDuelForUser(int userId) {
         try {

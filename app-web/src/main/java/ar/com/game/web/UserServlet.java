@@ -250,36 +250,38 @@ public class UserServlet extends HttpServlet {
                 ));
 
             } else if (path.endsWith("/login")) {
-                String email = data.get("email");
-                String password = data.get("password");
-                if (email == null || password == null) {
-                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    writeJson(resp, Map.of(
-                        "success", false,
-                        "message", "Email y password son obligatorios."
-                    ));
-                    return;
-                }
+                    String email = data.get("email");
+                    String password = data.get("password");
+                    if (email == null || password == null) {
+                        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        writeJson(resp, Map.of(
+                            "success", false,
+                            "message", "Email y password son obligatorios."
+                        ));
+                        return;
+                    }
 
-                ServiceResponse loginResp = userService.loginUser(email, password);
-                if (loginResp.isSuccess()) {
-                    User user = (User) loginResp.getData();
-                    session.setAttribute("user", user);
-                    resp.setStatus(HttpServletResponse.SC_OK);
-                    writeJson(resp, Map.of(
-                        "success", true,
-                        "message", loginResp.getMessage(),
-                        "userId", user.getId()
-                    ));
-                } else {
-                    resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    writeJson(resp, Map.of(
-                        "success", false,
-                        "message", loginResp.getMessage()
-                    ));
-                }
-
-            }  else if (path.endsWith("/send-duel")) {
+                    ServiceResponse loginResp = userService.loginUser(email, password);
+                    if (loginResp.isSuccess()) {
+                        User user = (User) loginResp.getData();
+                        session.setAttribute("user", user);
+                        resp.setStatus(HttpServletResponse.SC_OK);
+                        writeJson(resp, Map.of(
+                            "success", true,
+                            "message", loginResp.getMessage(),
+                            "userId", user.getId(),
+                            "name", user.getName(),
+                            "competitiveMatches", user.getCompetitiveMatches(),
+                            "wins", user.getWins(),
+                            "losses", user.getLosses()
+                        ));
+                    } else {
+                        resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        writeJson(resp, Map.of(
+                            "success", false,
+                            "message", loginResp.getMessage()
+                        ));
+                    }  }  else if (path.endsWith("/send-duel")) {
                 if (session == null || session.getAttribute("user") == null) {
                     resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     writeJson(resp, Map.of(
