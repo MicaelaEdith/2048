@@ -45,7 +45,7 @@ public class DuelServlet extends HttpServlet {
         } else {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             mapper.writeValue(resp.getWriter(), Map.of(
-                "success", false, 
+                "success", false,
                 "message", "Error registrando puntaje."
             ));
         }

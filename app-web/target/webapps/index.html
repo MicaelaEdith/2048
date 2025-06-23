@@ -32,7 +32,10 @@
         </div>
 
         <div id="profile">
+			<div style="display: flex; margin-bottom: 10px;">
+			<button id="tournaments-btn" class="btn">Torneos</button>
             <h3 id="user-name">User Name</h3>
+			</div>
             <label for="points">Points: <span id="score">0</span></label>
 			<p id="game-over">¡Game Over!</p>
 
@@ -52,6 +55,7 @@
 		
 		<div id="form-edit-profile" style="display: none;">
 		  <div class="form-login">
+
 		    <label for="edit-name">Nuevo nombre</label>
 		    <input type="text" id="edit-name" />
 
@@ -70,7 +74,25 @@
 		  </div>
 		</div>
 
+		<div id="tournament-panel" style="display: none;">
+		  <button id="back-to-profile-btn" class="btn">Volver al perfil</button>
 
+		  <div>
+		    <input type="text" id="tournament-name" placeholder="Nombre del torneo (opcional)" />
+		    <button id="create-tournament-btn" class="btn">Crear Torneo</button>
+		  </div>
+
+		  <div id="tournament-select-panel">
+		    <input type="text" id="tournament-search" placeholder="Buscar torneo...">
+		    <button id="join-tournament-btn" class="btn" disabled>Unirse al torneo</button>
+		  </div>
+		    <div id="tournament-dropdown" class="dropdown-list"></div>
+
+
+		  <div id="tournament-feedback"></div>
+		</div>
+
+		
     </main>
 
     <span class="ranking-title">Ranking</span>

@@ -166,8 +166,11 @@ input{
 }
 
 .ranking{
+	width: 75%;
     display : flex;
     flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
 }
 
 .ranking .username-rank{
@@ -195,7 +198,7 @@ input{
 }
 
 .ranking-tag{
-    margin: 6px;
+    margin: 8px;
     margin-top: 0;
     background-color: var(--grid-background);
     border-radius: 5px;
@@ -229,6 +232,29 @@ input{
     display: none;
 }
 
+#tournaments-btn{
+	font-size: small;
+	padding: 6px;
+	margin-right: 8px;
+}
+
+#back-to-profile-btn{
+	font-size: medium;
+	padding: 6px 8px 5px 8px;
+	margin-bottom: 8px;
+}
+
+#create-tournament-btn{
+	font-size: small;
+	padding: 4px 6px 4px 6px;
+	margin-left: 5px;
+}
+
+#join-tournament-btn{
+	font-size: small;
+	padding: 4px 6px 4px 6px;
+	margin-left: 5px;
+}
 
 .modal-alert {
   position: fixed;

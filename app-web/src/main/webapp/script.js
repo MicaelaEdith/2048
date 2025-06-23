@@ -628,3 +628,138 @@ document.addEventListener("DOMContentLoaded", () => {
   renderGrid();
   updateRanking();
 });
+
+
+const tournamentPanel = document.getElementById("tournament-panel");
+const tournamentsBtn = document.getElementById("tournaments-btn");
+const backToProfileBtn = document.getElementById("back-to-profile-btn");
+const createTournamentBtn = document.getElementById("create-tournament-btn");
+const joinTournamentBtn = document.getElementById("join-tournament-btn");
+const tournamentNameInput = document.getElementById("tournament-name");
+const tournamentSearchInput = document.getElementById("tournament-search");
+const tournamentDropdown = document.getElementById("tournament-dropdown");
+
+let tournamentList = [];
+let selectedTournamentId = null;
+
+// Mostrar el panel de torneos
+tournamentsBtn.addEventListener("click", () => {
+  profile.style.display = "none";
+  tournamentPanel.style.display = "block";
+  loadTournaments();
+});
+
+// Volver al perfil
+backToProfileBtn.addEventListener("click", () => {
+  tournamentPanel.style.display = "none";
+  profile.style.display = "flex";
+});
+
+// Crear torneo
+createTournamentBtn.addEventListener("click", () => {
+  const name = tournamentNameInput.value.trim();
+
+  fetch("/app-web/api/tournament/create", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ name })
+  })
+    .then(resp => resp.json())
+    .then(data => {
+      if (data.success) {
+        showCustomAlert(`Torneo creado con ID ${data.id} y nombre "${data.name}"`);
+        tournamentNameInput.value = "";
+        loadTournaments(); // actualizar lista
+      } else {
+        showCustomAlert("Error al crear torneo: " + (data.message || ""));
+      }
+    })
+    .catch(err => {
+      console.error("Error creando torneo:", err);
+      showCustomAlert("Error creando torneo.");
+    });
+});
+
+// Cargar torneos disponibles
+function loadTournaments() {
+  fetch("/app-web/api/tournament/all", { credentials: "include" })
+    .then(resp => resp.json())
+    .then(data => {
+      if (data.success && Array.isArray(data.tournaments)) {
+        tournamentList = data.tournaments;
+        renderTournamentDropdown(tournamentList);
+      }
+    })
+    .catch(err => {
+      console.error("Error cargando torneos:", err);
+    });
+}
+
+// Renderizar lista desplegable
+function renderTournamentDropdown(list) {
+  tournamentDropdown.innerHTML = "";
+  if (list.length === 0) {
+    tournamentDropdown.style.display = "none";
+    return;
+  }
+
+  list.forEach(t => {
+    const item = document.createElement("div");
+    item.textContent = t.name;
+    item.dataset.id = t.id;
+    item.classList.add("dropdown-item");
+
+    item.addEventListener("click", () => {
+      tournamentSearchInput.value = t.name;
+      selectedTournamentId = t.id;
+      tournamentDropdown.style.display = "none";
+      joinTournamentBtn.disabled = false;
+    });
+
+    tournamentDropdown.appendChild(item);
+  });
+
+  tournamentDropdown.style.display = "block";
+}
+
+// Filtro al escribir
+tournamentSearchInput.addEventListener("input", () => {
+  const value = tournamentSearchInput.value.toLowerCase();
+  const filtered = tournamentList.filter(t => t.name.toLowerCase().includes(value));
+  selectedTournamentId = null;
+  joinTournamentBtn.disabled = true;
+  renderTournamentDropdown(filtered);
+});
+
+// Unirse a torneo seleccionado
+joinTournamentBtn.addEventListener("click", () => {
+  if (!selectedTournamentId) {
+    showCustomAlert("Seleccioná un torneo.");
+    return;
+  }
+
+  fetch("/app-web/api/tournament/join", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ tournamentId: selectedTournamentId })
+  })
+    .then(resp => resp.json())
+    .then(data => {
+      if (data.success) {
+        showCustomAlert(`Te uniste al torneo correctamente.`);
+        tournamentSearchInput.value = "";
+        tournamentDropdown.innerHTML = "";
+        joinTournamentBtn.disabled = true;
+        selectedTournamentId = null;
+      } else {
+        showCustomAlert("Error al unirse al torneo: " + (data.message || ""));
+      }
+    })
+    .catch(err => {
+      console.error("Error uniéndose al torneo:", err);
+      showCustomAlert("Error uniéndose al torneo.");
+    });
+});
+

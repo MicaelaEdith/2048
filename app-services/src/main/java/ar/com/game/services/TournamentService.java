@@ -1,18 +1,30 @@
 package ar.com.game.services;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import ar.com.game.domain.Tournament;
 import ar.com.game.repository.TournamentRepository;
+import ar.com.game.repository.TournamentRepositoryImpl;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.*;
 
 public class TournamentService {
     private final TournamentRepository tournamentRepo;
     private final Map<Integer, Tournament> activeTournaments = new HashMap<>();
 
+    // Constructor vacío que crea la conexión y la implementación del repositorio
+    public TournamentService() {
+        try {
+            // Cambia esta URL por la de tu DB, con usuario y contraseña si hace falta
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/tu_basededatos", "usuario", "password");
+            this.tournamentRepo = new TournamentRepositoryImpl(connection);
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al conectar a la base de datos", e);
+        }
+    }
+
+    // Constructor con repo externo (por si inyectás)
     public TournamentService(TournamentRepository repo) {
         this.tournamentRepo = repo;
     }
@@ -60,5 +72,10 @@ public class TournamentService {
     public boolean isCreator(int tournamentId, int userId) {
         Tournament t = activeTournaments.get(tournamentId);
         return t != null && t.getCreatorId() == userId;
+    }
+
+    // Método para obtener todos los torneos de la BD
+    public List<Tournament> getAllTournaments() {
+        return tournamentRepo.findAll();
     }
 }

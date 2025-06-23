@@ -1,4 +1,5 @@
 org/app/web/App.class
+ar/com/game/web/TournamentServlet.class
 ar/com/game/web/DuelServlet.class
 ar/com/game/web/RankingServlet.class
 ar/com/game/web/UserServlet.class

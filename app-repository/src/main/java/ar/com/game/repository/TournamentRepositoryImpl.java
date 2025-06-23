@@ -3,6 +3,8 @@ package ar.com.game.repository;
 import ar.com.game.domain.Tournament;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class TournamentRepositoryImpl implements TournamentRepository {
@@ -63,5 +65,29 @@ public class TournamentRepositoryImpl implements TournamentRepository {
             throw new RuntimeException("Error al buscar torneo", e);
         }
         return Optional.empty();
+    }
+
+    @Override
+    public List<Tournament> findAll() {
+        String sql = "SELECT * FROM tournaments";
+        List<Tournament> tournaments = new ArrayList<>();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Tournament t = new Tournament();
+                t.setId(rs.getInt("id"));
+                t.setName(rs.getString("name"));
+                t.setCreatorId(rs.getInt("creator_id"));
+                t.setWinnerId((Integer) rs.getObject("winner_id"));
+                t.setCreatedAt(rs.getTimestamp("created_at"));
+                tournaments.add(t);
+            }
+            return tournaments;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al obtener lista de torneos", e);
+        }
     }
 }
