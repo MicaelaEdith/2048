@@ -89,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let startY = 0;
   let gameStarted = false;
   
+  let currentDuelId = null;
   let duelActive = false;
   let duelOpponentName = null;
   let duelOpponentScore = null;
@@ -159,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
       fetch("/app-web/api/user/update-points", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ score: finalScore }),
+        body: JSON.stringify({ score: finalScore, duelId: currentDuelId }),
         credentials: "include"
       })
         .then(resp => resp.json())
@@ -472,6 +473,7 @@ document.addEventListener("DOMContentLoaded", () => {
           duelActive = true;
           duelOpponentName = data.opponentName;
           duelOpponentScore = data.opponentScore || 0;
+          currentDuelId = data.duelId || null;
           restartBtn.click();
         } else {
           fetch("/app-web/api/user/duel/last", {

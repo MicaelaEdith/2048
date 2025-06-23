@@ -1,9 +1,11 @@
+// src/main/java/ar/com/game/web/DuelServlet.java
 package ar.com.game.web;
 
 import ar.com.game.domain.User;
 import ar.com.game.services.DuelService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
@@ -12,6 +14,7 @@ import java.util.Map;
 @WebServlet(urlPatterns = "/api/duel/submit")
 public class DuelServlet extends HttpServlet {
 
+    private static final long serialVersionUID = 1L;
     private final ObjectMapper mapper = new ObjectMapper();
     private final DuelService duelService = new DuelService();
 
@@ -23,7 +26,10 @@ public class DuelServlet extends HttpServlet {
 
         if (session == null || session.getAttribute("user") == null) {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            mapper.writeValue(resp.getWriter(), Map.of("success", false, "message", "No hay sesión activa."));
+            mapper.writeValue(resp.getWriter(), Map.of(
+                "success", false, 
+                "message", "No hay sesión activa."
+            ));
             return;
         }
 
@@ -38,7 +44,10 @@ public class DuelServlet extends HttpServlet {
             mapper.writeValue(resp.getWriter(), Map.of("success", true));
         } else {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            mapper.writeValue(resp.getWriter(), Map.of("success", false, "message", "Error registrando puntaje."));
+            mapper.writeValue(resp.getWriter(), Map.of(
+                "success", false, 
+                "message", "Error registrando puntaje."
+            ));
         }
     }
 }

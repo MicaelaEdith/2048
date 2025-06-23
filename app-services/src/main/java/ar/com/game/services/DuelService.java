@@ -18,14 +18,13 @@ public class DuelService {
             return false;
         }
     }
-    
+
     public boolean submitDuelScore(int userId, int score) {
         try {
             Duel duel = duelRepository.findPendingDuelForUser(userId);
-            if (duel == null) return false;
-
-            boolean reached2048 = score >= 2048;
-            if (reached2048) score += 2048;
+            if (duel == null) {
+                return false;
+            }
 
             boolean updated = duelRepository.updateDuelScore(duel.getId(), userId, score);
 
@@ -39,7 +38,7 @@ public class DuelService {
             return false;
         }
     }
-    
+
     public Duel getPendingDuelForUser(int userId) {
         try {
             return duelRepository.findPendingDuelForUser(userId);
@@ -48,8 +47,7 @@ public class DuelService {
             return null;
         }
     }
-    
-    
+
     public Duel getLastDuelForUser(int userId) {
         try {
             return duelRepository.findLastDuelForUser(userId);
@@ -58,5 +56,4 @@ public class DuelService {
             return null;
         }
     }
-
 }

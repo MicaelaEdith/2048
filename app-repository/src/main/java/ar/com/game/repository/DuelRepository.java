@@ -164,7 +164,8 @@ public class DuelRepository {
                     return duel;
                 }
             }
-        }  //CHequear db
+        }  //CHequear db2048
+        
         return null;
     }
 

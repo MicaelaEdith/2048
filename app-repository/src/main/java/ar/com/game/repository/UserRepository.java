@@ -1,3 +1,4 @@
+
 package ar.com.game.repository;
 
 import ar.com.game.domain.User;
@@ -245,7 +246,100 @@ public class UserRepository {
 	            return ps.executeUpdate() > 0;
         }
     }
+    public boolean updateStatsForBothPlayersFromDuel(int duelId) throws SQLException {
+        String selectSql = """
+            SELECT 
+              player1_id, 
+              player2_id, 
+              winner_id, 
+              player1_points, 
+              player2_points
+            FROM duels
+            WHERE id = ?
+        """;
 
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement psSelect = conn.prepareStatement(selectSql)) {
 
+            psSelect.setInt(1, duelId);
+            try (ResultSet rs = psSelect.executeQuery()) {
+                if (!rs.next()) {
+                    return false;
+                }
 
-}
+                Integer player1Id  = rs.getObject("player1_id",  Integer.class);
+                Integer player2Id  = rs.getObject("player2_id",  Integer.class);
+                Integer winnerId   = rs.getObject("winner_id",    Integer.class);
+                Integer p1Points   = rs.getObject("player1_points", Integer.class);
+                Integer p2Points   = rs.getObject("player2_points", Integer.class);
+
+                if (winnerId == null) {
+                    return false;
+                }
+
+                if (winnerId.equals(player1Id)) {
+                    String win1 = """
+                        UPDATE users
+                        SET 
+                          total_points       = GREATEST(total_points, ?),
+                          competitive_matches = competitive_matches + 1,
+                          wins               = wins + 1
+                        WHERE id = ?
+                    """;
+                    try (PreparedStatement ps1 = conn.prepareStatement(win1)) {
+                        ps1.setInt(1, p1Points != null ? p1Points : 0);
+                        ps1.setInt(2, player1Id);
+                        ps1.executeUpdate();
+                    }
+                } else {
+                    String lose1 = """
+                        UPDATE users
+                        SET 
+                          total_points       = GREATEST(total_points, ?),
+                          competitive_matches = competitive_matches + 1,
+                          losses             = losses + 1
+                        WHERE id = ?
+                    """;
+                    try (PreparedStatement ps1 = conn.prepareStatement(lose1)) {
+                        ps1.setInt(1, p1Points != null ? p1Points : 0);
+                        ps1.setInt(2, player1Id);
+                        ps1.executeUpdate();
+                    }
+                }
+
+                if (winnerId.equals(player2Id)) {
+                    String win2 = """
+                        UPDATE users
+                        SET 
+                          total_points       = GREATEST(total_points, ?),
+                          competitive_matches = competitive_matches + 1,
+                          wins               = wins + 1
+                        WHERE id = ?
+                    """;
+                    try (PreparedStatement ps2 = conn.prepareStatement(win2)) {
+                        ps2.setInt(1, p2Points != null ? p2Points : 0);
+                        ps2.setInt(2, player2Id);
+                        ps2.executeUpdate();
+                    }
+                } else {
+                    String lose2 = """
+                        UPDATE users
+                        SET 
+                          total_points       = GREATEST(total_points, ?),
+                          competitive_matches = competitive_matches + 1,
+                          losses             = losses + 1
+                        WHERE id = ?
+                    """;
+                    try (PreparedStatement ps2 = conn.prepareStatement(lose2)) {
+                        ps2.setInt(1, p2Points != null ? p2Points : 0);
+                        ps2.setInt(2, player2Id);
+                        ps2.executeUpdate();
+                    }
+                }
+
+                return true;
+            }
+        }
+    }
+
+} 

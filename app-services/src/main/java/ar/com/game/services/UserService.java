@@ -255,5 +255,17 @@ public class UserService {
         }
     }
 
+    public ServiceResponse updateStatsForBothPlayersFromDuel(int duelId) {
+        try {
+            boolean ok = repository.updateStatsForBothPlayersFromDuel(duelId);
+            if (!ok) {
+                return new ServiceResponse(false, "Error al actualizar estadísticas.");
+            }
+            return new ServiceResponse(true, "Estadísticas actualizadas correctamente.");
+        } catch (SQLException e) {
+            return new ServiceResponse(false, "Error: " + e.getMessage());
+        }
+    }
 
 }
+

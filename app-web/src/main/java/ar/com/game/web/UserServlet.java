@@ -128,7 +128,8 @@ public class UserServlet extends HttpServlet {
                         "success", true,
                         "duelPending", true,
                         "opponentName", opponentName,
-                        "opponentScore", opponentScore != null ? opponentScore : 0
+                        "opponentScore", opponentScore != null ? opponentScore : 0,
+                        "duelId", duel.getId()
                     ));
 
                 } else {
@@ -367,7 +368,8 @@ public class UserServlet extends HttpServlet {
                         return;
                     }
 
-                    ServiceResponse duelUpdateResp = userService.updateUserStatsAfterDuel((long)user.getId(), duelId, score);
+                    ServiceResponse duelUpdateResp = userService.updateStatsForBothPlayersFromDuel(duelId);
+
 
                     if (!duelUpdateResp.isSuccess()) {
                         resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -378,6 +380,8 @@ public class UserServlet extends HttpServlet {
 
                 resp.setStatus(HttpServletResponse.SC_OK);
                 writeJson(resp, Map.of("success", true, "message", "Puntaje y estadísticas actualizadas correctamente."));
+
+            
             } else if (path.endsWith("/update-profile")) {
                 if (session == null || session.getAttribute("user") == null) {
                     resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
