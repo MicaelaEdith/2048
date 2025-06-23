@@ -125,7 +125,7 @@ public class UserRepository {
 
     public List<User> getAllUsers() throws SQLException {
         List<User> users = new ArrayList<>();
-        String query = "SELECT * FROM users ORDER BY id";
+        String query = "SELECT * FROM users WHERE activo = 1 ORDER BY id";
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
@@ -225,6 +225,27 @@ public class UserRepository {
             return stmt.executeUpdate() > 0;
         }
     }
+    
+    public boolean updateUserStatsAfterDuel(Long userId, boolean won, boolean lost, int points) throws SQLException {
+        String sql = "UPDATE users SET " +
+                     "total_points = GREATEST(total_points, ?), " +
+                     "competitive_matches = competitive_matches + 1, " +
+                     "wins = wins + ?, " +
+                     "losses = losses + ? " +
+                     "WHERE id = ?";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+        	PreparedStatement ps = conn.prepareStatement(sql)) {
+        	
+	            ps.setInt(1, points);
+	            ps.setInt(2, won ? 1 : 0);
+	            ps.setInt(3, lost ? 1 : 0);
+	            ps.setLong(4, userId);
+	
+	            return ps.executeUpdate() > 0;
+        }
+    }
+
 
 
 }

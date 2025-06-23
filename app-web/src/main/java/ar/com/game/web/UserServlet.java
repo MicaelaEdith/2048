@@ -25,7 +25,10 @@ import java.util.stream.Collectors;
     "/api/user/send-duel",
     "/api/user/update-points",
     "/api/user/duel/pending",
-    "/api/user/duel/last"
+    "/api/user/duel/last",
+    "/api/user/update-profile",
+    "/api/user/delete-account"
+
 })
 public class UserServlet extends HttpServlet {
 
@@ -175,14 +178,7 @@ public class UserServlet extends HttpServlet {
             } else {
                 writeJson(resp, Map.of("success", true, "duelFound", false));
             }
-        }
-
-            
-            
-            
-            
-            
-            else {
+        } else {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
@@ -326,7 +322,7 @@ public class UserServlet extends HttpServlet {
             
 
             } else if (path.endsWith("/update-points")) {
-                if (session == null || session.getAttribute("user") == null) {
+            	if (session == null || session.getAttribute("user") == null) {
                     resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     writeJson(resp, Map.of("success", false, "message", "No hay sesión activa."));
                     return;
@@ -334,6 +330,7 @@ public class UserServlet extends HttpServlet {
 
                 User user = (User) session.getAttribute("user");
                 Object scoreRaw = data.get("score");
+                Object duelIdRaw = data.get("duelId");
 
                 if (scoreRaw == null) {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -356,9 +353,109 @@ public class UserServlet extends HttpServlet {
 
                 userService.updateTotalPointsIfHigher(user.getId(), score);
 
+                if (duelIdRaw != null) {
+                    int duelId;
+                    try {
+                        if (duelIdRaw instanceof Integer) {
+                            duelId = (Integer) duelIdRaw;
+                        } else {
+                            duelId = Integer.parseInt(duelIdRaw.toString());
+                        }
+                    } catch (NumberFormatException e) {
+                        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        writeJson(resp, Map.of("success", false, "message", "Formato de ID de duelo inválido."));
+                        return;
+                    }
+
+                    ServiceResponse duelUpdateResp = userService.updateUserStatsAfterDuel((long)user.getId(), duelId, score);
+
+                    if (!duelUpdateResp.isSuccess()) {
+                        resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        writeJson(resp, Map.of("success", false, "message", duelUpdateResp.getMessage()));
+                        return;
+                    }
+                }
+
                 resp.setStatus(HttpServletResponse.SC_OK);
-                writeJson(resp, Map.of("success", true, "message", "Puntaje verificado y actualizado si era mayor."));
-            } else {
+                writeJson(resp, Map.of("success", true, "message", "Puntaje y estadísticas actualizadas correctamente."));
+            } else if (path.endsWith("/update-profile")) {
+                if (session == null || session.getAttribute("user") == null) {
+                    resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    writeJson(resp, Map.of("success", false, "message", "No hay sesión activa."));
+                    return;
+                }
+
+                User currentUser = (User) session.getAttribute("user");
+
+                String newName = data.get("name");
+                String currentPassword = data.get("currentPassword"); 
+                String newPassword = data.get("password");
+
+                if (newName == null || newName.trim().isEmpty()) {
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    writeJson(resp, Map.of("success", false, "message", "El nombre es obligatorio."));
+                    return;
+                }
+                
+                if (newPassword != null && !newPassword.trim().isEmpty()) {
+                    if (currentPassword == null || currentPassword.trim().isEmpty()) {
+                        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        writeJson(resp, Map.of("success", false, "message", "Debe ingresar la contraseña actual para cambiarla."));
+                        return;
+                    }
+
+                    ServiceResponse validPass = userService.loginUser(currentUser.getEmail(), currentPassword);
+                    if (!validPass.isSuccess()) {
+                        resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        writeJson(resp, Map.of("success", false, "message", "Contraseña actual incorrecta."));
+                        return;
+                    }
+                }
+
+                try {
+                    User userToUpdate = userService.findById((long)currentUser.getId());
+                    userToUpdate.setName(newName.trim());
+
+                    if (newPassword != null && !newPassword.trim().isEmpty()) {
+                        String hashed = org.mindrot.jbcrypt.BCrypt.hashpw(newPassword, org.mindrot.jbcrypt.BCrypt.gensalt());
+                        userToUpdate.setPassword(hashed);
+                    }
+
+                    ServiceResponse updateResult = userService.updateUser(userToUpdate);
+
+                    if (updateResult.isSuccess()) {
+                        session.setAttribute("user", userToUpdate);
+
+                        resp.setStatus(HttpServletResponse.SC_OK);
+                        writeJson(resp, Map.of("success", true, "message", updateResult.getMessage()));
+                    } else {
+                        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        writeJson(resp, Map.of("success", false, "message", updateResult.getMessage()));
+                    }
+                } catch (Exception e) {
+                    resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    writeJson(resp, Map.of("success", false, "message", "Error interno: " + e.getMessage()));
+                }
+            } else if (path.endsWith("/delete-account")) {
+                if (session == null || session.getAttribute("user") == null) {
+                    resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    writeJson(resp, Map.of("success", false, "message", "No hay sesión activa."));
+                    return;
+                }
+
+                User currentUser = (User) session.getAttribute("user");
+
+                ServiceResponse deleteResult = userService.deleteUserById((long)currentUser.getId());
+
+                if (deleteResult.isSuccess()) {
+                    session.invalidate();
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    writeJson(resp, Map.of("success", true, "message", deleteResult.getMessage()));
+                } else {
+                    resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    writeJson(resp, Map.of("success", false, "message", deleteResult.getMessage()));
+                }
+                } else {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {

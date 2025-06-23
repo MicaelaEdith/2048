@@ -142,4 +142,30 @@ public class DuelRepository {
         return null;
     }
 
+    public Duel findById(int duelId) throws SQLException {
+        String sql = "SELECT * FROM duels WHERE id = ?";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, duelId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Duel duel = new Duel();
+                    duel.setId(rs.getInt("id"));
+                    duel.setPlayer1Id(rs.getInt("player1_id"));
+                    duel.setPlayer2Id(rs.getInt("player2_id"));
+                    duel.setPlayer1Points(rs.getObject("player1_points", Integer.class));
+                    duel.setPlayer2Points(rs.getObject("player2_points", Integer.class));
+                    duel.setPlayer1TimeSeconds(rs.getObject("player1_time_seconds", Integer.class));
+                    duel.setPlayer2TimeSeconds(rs.getObject("player2_time_seconds", Integer.class));
+                    duel.setWinnerId(rs.getObject("winner_id", Integer.class));
+                    return duel;
+                }
+            }
+        }  //CHequear db
+        return null;
+    }
+
 }

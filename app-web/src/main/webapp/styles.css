@@ -224,10 +224,11 @@ input{
 
 
 #profile,
-.form-login,
+#form-login .form-login,
 #cancel-btn {
     display: none;
 }
+
 
 .modal-alert {
   position: fixed;

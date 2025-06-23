@@ -12,6 +12,38 @@ function showCustomAlert(message, callback = null) {
   };
 }
 
+function showDoubleConfirmDialog(message1, message2, onFinalConfirm) {
+  const modal = document.getElementById("confirm-delete-alert");
+  const messageEl = document.getElementById("confirm-delete-message");
+  const yesBtn = document.getElementById("confirm-delete-yes");
+  const noBtn = document.getElementById("confirm-delete-no");
+
+  function firstStep() {
+    messageEl.textContent = message1;
+    modal.classList.remove("hidden");
+
+    yesBtn.onclick = () => {
+      messageEl.textContent = message2;
+
+      yesBtn.onclick = () => {
+        modal.classList.add("hidden");
+        onFinalConfirm();
+      };
+
+      noBtn.onclick = () => {
+        modal.classList.add("hidden");
+      };
+    };
+
+    noBtn.onclick = () => {
+      modal.classList.add("hidden");
+    };
+  }
+
+  firstStep();
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
   const grid = document.getElementById("grid");
   const scoreDisplay = document.getElementById("score");
@@ -40,6 +72,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const sendDuelBtn = document.getElementById("btn-send-duel");
 
   const restartBtn = document.getElementById("restart-btn");
+  
+  const formEditProfile = document.getElementById("form-edit-profile");
+  const editNameInput = document.getElementById("edit-name");
+  const editCurrentPassInput = document.getElementById("edit-current-password");
+  const editNewPassInput = document.getElementById("edit-new-password");
+  const submitEditBtn = document.getElementById("submit-edit-btn");
+  const cancelEditBtn = document.getElementById("cancel-edit-btn");
 
   let contacts = [];
   let selectedContact = null;
@@ -143,7 +182,10 @@ document.addEventListener("DOMContentLoaded", () => {
 		  }
 		  duelActive = false;
 		}
+		restartBtn.click();
     }
+	
+	
   }
 
   function sendMove(direction) {
@@ -454,11 +496,78 @@ document.addEventListener("DOMContentLoaded", () => {
     signupBtn.style.display = "inline-block";
     editBtn.style.display = "none";
   }
+  
+  function showEditProfile(userName) {
+    formEditProfile.style.display = "block";
+    profile.style.display = "none";
+    
+    editNameInput.value = userName || "";
+    editCurrentPassInput.value = "";
+    editNewPassInput.value = "";
+  }
+
+  function hideEditProfile() {
+    formEditProfile.style.display = "none";
+    profile.style.display = "flex";
+  }
+  
+  editBtn.addEventListener("click", () => {
+    showEditProfile(userNameDisplay.textContent);
+  });
+
+  cancelEditBtn.addEventListener("click", () => {
+    hideEditProfile();
+  });
+
+  submitEditBtn.addEventListener("click", () => {
+    const newName = editNameInput.value.trim();
+    const currentPass = editCurrentPassInput.value;
+    const newPass = editNewPassInput.value;
+
+    if (!newName) {
+      showCustomAlert("El nombre no puede estar vacío.");
+      return;
+    }
+
+    if (newPass && !currentPass) {
+      showCustomAlert("Para cambiar la contraseña, ingrese la contraseña actual.");
+      return;
+    }
+
+    const payload = { name: newName };
+    if (newPass) payload.password = newPass;
+    if (newPass) payload.currentPassword = currentPass;
+
+    fetch("/app-web/api/user/update-profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(payload)
+    })
+      .then(resp => resp.json())
+      .then(data => {
+        if (data.success) {
+          showCustomAlert("Perfil actualizado correctamente.", () => {
+            userNameDisplay.textContent = newName;
+            hideEditProfile();
+          });
+        } else {
+          showCustomAlert("Error al actualizar: " + (data.message || "Error desconocido."));
+        }
+      })
+      .catch(err => {
+        console.error("Error al actualizar perfil:", err);
+        showCustomAlert("Error en la comunicación con el servidor.");
+      });
+  });
+
+
 
   loginBtn.addEventListener("click", showLoginForm);
   signupBtn.addEventListener("click", showSignupForm);
   cancelBtn.addEventListener("click", hideForm);
 
+  
   document.getElementById("logout-btn").addEventListener("click", () => {
     fetch("/app-web/api/user/logout", {
       method: "GET",
@@ -469,7 +578,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.success) {
           hideProfile();
           hideForm();
-          showCustomAlert("redireccionando.", () => location.reload());
         } else {
           showCustomAlert("Logout failed.");
         }
@@ -480,6 +588,39 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   });
 
+  document.getElementById("delete-account-btn").addEventListener("click", () => {
+    showDoubleConfirmDialog(
+      "¿Estás seguro que deseas eliminar tu cuenta? Esta acción es permanente.",
+      "Una vez eliminada, no podrás recuperar tus datos. ¿Eliminar cuenta definitivamente?",
+      () => {
+        fetch("/app-web/api/user/delete-account", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({})
+        })
+          .then(resp => resp.json())
+          .then(data => {
+            if (data.success) {
+              showCustomAlert("Cuenta eliminada. Se cerrará la sesión.", () => {
+                location.reload();
+              });
+            } else {
+              showCustomAlert("Error al eliminar la cuenta: " + (data.message || "Error desconocido."));
+            }
+          })
+          .catch(err => {
+            console.error("Error al eliminar cuenta:", err);
+            showCustomAlert("Error en la comunicación con el servidor.");
+          });
+      }
+    );
+  });
+
+  
+  
   hideForm();
   hideProfile();
   renderGrid();

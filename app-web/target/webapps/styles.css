@@ -224,10 +224,11 @@ input{
 
 
 #profile,
-.form-login,
+#form-login .form-login,
 #cancel-btn {
     display: none;
 }
+
 
 .modal-alert {
   position: fixed;
@@ -243,8 +244,9 @@ input{
 }
 
 .modal-content {
-  background: #fff;
-  padding: 20px 30px;
+  background: var(--background-color);
+  padding: 35px 60px;
+  border: solid 6px var(--grid-background);
   border-radius: 8px;
   text-align: center;
   font-family: sans-serif;
@@ -256,11 +258,18 @@ input{
 
 #alert-ok-btn {
   padding: 8px 16px;
-  background: #2196f3;
-  color: #fff;
-  border: none;
+  background: var(--background-color);
+  color: var(--text-color);
+  font-weight: 600;
+  border: dashed 3px var(--grid-background);
   border-radius: 4px;
   cursor: pointer;
+}
+
+#alert-ok-btn:hover {
+  color: var(--background-color);
+  background-color: var(--text-color);
+  border: dashed 3px var(--grid-background)
 }
 
 .hidden {

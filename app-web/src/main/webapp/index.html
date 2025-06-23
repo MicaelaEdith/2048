@@ -49,6 +49,27 @@
 				<button id="edit-btn" class="btn">Edit Profile</button>
 			</div>
         </div>
+		
+		<div id="form-edit-profile" style="display: none;">
+		  <div class="form-login">
+		    <label for="edit-name">Nuevo nombre</label>
+		    <input type="text" id="edit-name" />
+
+		    <label for="edit-current-password">Contraseña actual</label>
+		    <input type="password" id="edit-current-password" />
+
+		    <label for="edit-new-password">Nueva contraseña</label>
+		    <input type="password" id="edit-new-password" />
+
+		    <button id="submit-edit-btn" class="btn">Guardar cambios</button>
+		    <button id="cancel-edit-btn" class="btn">Cancelar</button>
+			
+			<button id="delete-account-btn" class="btn" style="background-color: #f44336; border-color: #c62828;">
+			  Eliminar cuenta
+			</button>
+		  </div>
+		</div>
+
 
     </main>
 
@@ -89,7 +110,6 @@
         <hr>
         
     </footer>
-    <script src="script.js"></script>
 	
 	<div id="custom-alert" class="modal-alert hidden">
 	  <div class="modal-content">
@@ -98,6 +118,18 @@
 	  </div>
 	</div>
 
+	
+	<div id="confirm-delete-alert" class="modal-alert hidden">
+	  <div class="modal-content">
+	    <p id="confirm-delete-message"></p>
+	    <div id="confirm-delete-buttons">
+	      <button id="confirm-delete-yes" class="btn">Sí</button>
+	      <button id="confirm-delete-no" class="btn">No</button>
+	    </div>
+	  </div>
+	</div>
+
+    <script src="script.js"></script>
 </body>
 
 </html>

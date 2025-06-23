@@ -228,5 +228,32 @@ public class UserService {
             e.printStackTrace();
         }
     }
+    
+    public ServiceResponse updateUserStatsAfterDuel(Long userId, int duelId, int score) {
+        try {
+        	DuelRepository duelRepo = new DuelRepository();
+        	Duel duel = duelRepo.findById(duelId);
+
+            if (duel == null) {
+                return new ServiceResponse(false, "Duelo no encontrado.");
+            }
+
+            Integer winnerId = duel.getWinnerId();
+
+            boolean won = winnerId != null && winnerId.equals(userId);
+            boolean lost = winnerId != null && !winnerId.equals(userId);
+
+            boolean ok = repository.updateUserStatsAfterDuel(userId, won, lost, score);
+
+            if (!ok) {
+                return new ServiceResponse(false, "Error al actualizar estadísticas de usuario.");
+            }
+
+            return new ServiceResponse(true, "Estadísticas de usuario actualizadas correctamente.");
+        } catch (SQLException e) {
+            return new ServiceResponse(false, "Error al actualizar estadísticas: " + e.getMessage());
+        }
+    }
+
 
 }
